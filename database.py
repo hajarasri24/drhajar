@@ -91,7 +91,8 @@ def creer_tables():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
         patient_id INTEGER NOT NULL,
-
+        age TEXT,
+        poids TEXT,
         groupe_abo TEXT,
         rhesus TEXT,
 
@@ -99,7 +100,7 @@ def creer_tables():
         parite TEXT,
 
         atcd TEXT,
-
+        motif TEXT,
         ddr TEXT,
         dpa TEXT,
 

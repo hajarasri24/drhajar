@@ -120,7 +120,6 @@ class FenetreGrossesse(QWidget):
             self.modifier_grossesse(donnees_grossesse)
 
         else:
-
             self.sauvegarder_grossesse(donnees_grossesse)
 
         self.sauvegarder_suivi(donnees_suivi)
@@ -141,6 +140,10 @@ class FenetreGrossesse(QWidget):
         return {
 
             "patient_id": self.patient[0],
+            
+            "age": self.page_identite.age.text(),
+            
+            "poids": self.page_identite.poids.text(),
 
             "groupe_abo":
                 self.page_identite.groupe.text(),
@@ -156,6 +159,9 @@ class FenetreGrossesse(QWidget):
 
             "atcd":
                 self.page_identite.atcd.toPlainText(),
+                
+            "motif":
+                self.page_identite.motif.toPlainText(),
 
             "ddr":
                 self.page_identite.ddr.date().toString("yyyy-MM-dd"),
@@ -278,33 +284,39 @@ class FenetreGrossesse(QWidget):
         """, (grossesse_id,))
 
         g = curseur.fetchone()
-
+        print("This is g: ", g)
         conn.close()
 
         if g is None:
             return
 
         self.grossesse_id = grossesse_id
+        
+        self.page_identite.age.setText(g[2] or "")
+        
+        self.page_identite.poids.setText(g[3] or "")
 
-        self.page_identite.groupe.setText(g[2] or "")
+        self.page_identite.groupe.setText(g[4] or "")
 
-        self.page_identite.rhesus.setText(g[3] or "")
+        self.page_identite.rhesus.setText(g[5] or "")
 
-        self.page_identite.gestite.setText(g[4] or "")
+        self.page_identite.gestite.setText(g[6] or "")
 
-        self.page_identite.parite.setText(g[5] or "")
+        self.page_identite.parite.setText(g[7] or "")
 
-        self.page_identite.atcd.setPlainText(g[6] or "")
+        self.page_identite.atcd.setPlainText(g[8] or "")
+        
+        self.page_identite.motif.setPlainText(g[9] or "")
 
         self.page_identite.ddr.setDate(
-            QDate.fromString(g[7], "yyyy-MM-dd")
+            QDate.fromString(g[10], "yyyy-MM-dd")
         )
 
-        self.page_identite.dpa.setText(g[8] or "")
+        self.page_identite.dpa.setText(g[11] or "")
 
         self.page_identite.calculer_dates()
 
-        self.page_identite.statut.setCurrentText(g[9] or "En cours")  
+        self.page_identite.statut.setCurrentText(g[12] or "En cours")  
 
         conn = sqlite3.connect("drhajar.db")
         curseur = conn.cursor()
@@ -333,7 +345,8 @@ class FenetreGrossesse(QWidget):
             INSERT INTO grossesses (
 
                 patient_id,
-
+                age,
+                poids,
                 groupe_abo,
                 rhesus,
 
@@ -341,18 +354,19 @@ class FenetreGrossesse(QWidget):
                 parite,
 
                 atcd,
-
+                motif,
                 ddr,
                 dpa,
 
                 statut
 
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
 
             d["patient_id"],
-
+            d["age"],
+            d["poids"],
             d["groupe_abo"],
             d["rhesus"],
 
@@ -360,6 +374,7 @@ class FenetreGrossesse(QWidget):
             d["parite"],
 
             d["atcd"],
+            d["motif"],
 
             d["ddr"],
             d["dpa"],
@@ -466,12 +481,11 @@ class FenetreGrossesse(QWidget):
             d["mutuelle"]
 
         ))
-
         conn.commit()
-        conn.close()
 
         curseur.execute("SELECT * FROM suivi_grossesse")
         lignes = curseur.fetchall()
+        conn.close()
 
         print("\n===== CONTENU SUIVI_GROSSESSE =====")
         for ligne in lignes:
