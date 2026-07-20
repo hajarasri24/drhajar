@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QStackedWidget,
     QMessageBox,
+    QComboBox,
 )
 
 from PySide6.QtCore import QDate
@@ -25,6 +26,7 @@ class FenetreGrossesse(QWidget):
 
         self.patient = patient
         self.grossesse_id = None
+        self.liste_suivis = []
 
         self.setWindowTitle("Suivi de grossesse")
         self.resize(1400, 850)
@@ -40,6 +42,18 @@ class FenetreGrossesse(QWidget):
             "font-size:22px; font-weight:bold;"
         )
         menu.addWidget(titre)
+
+        self.label_visites = QLabel("Visite :")
+        self.label_visites.setVisible(False)
+        menu.addWidget(self.label_visites)
+
+        self.combo_visites = QComboBox()
+        self.combo_visites.setVisible(False)
+        menu.addWidget(self.combo_visites)
+
+        self.combo_visites.currentIndexChanged.connect(
+            self.changer_visite
+        )
 
         self.btn_identite = QPushButton("📋 Données obstétricales")
         self.btn_examen = QPushButton("🩺 Examen clinique")
@@ -112,6 +126,22 @@ class FenetreGrossesse(QWidget):
             )
             return
 
+        if self.confirmation_necessaire():
+
+            reponse = QMessageBox.question(
+                self,
+                "Confirmation",
+                "Cette action va créer une NOUVELLE visite "
+                "pour cette grossesse, même si aucune "
+                "information n'a été modifiée.\n\n"
+                "Voulez-vous continuer ?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+
+            if reponse != QMessageBox.Yes:
+                return
+
         donnees_grossesse = self.recuperer_donnees_grossesse()
         donnees_suivi = self.recuperer_donnees_suivi()
 
@@ -134,6 +164,10 @@ class FenetreGrossesse(QWidget):
         )
 
         self.close()
+
+    def confirmation_necessaire(self):
+
+        return self.grossesse_existe() and bool(self.liste_suivis)
 
     def recuperer_donnees_grossesse(self):
 
@@ -325,16 +359,92 @@ class FenetreGrossesse(QWidget):
             SELECT *
             FROM suivi_grossesse
             WHERE grossesse_id=?
-            ORDER BY id DESC
-            LIMIT 1
+            ORDER BY id ASC
         """, (grossesse_id,))
 
-        s = curseur.fetchone()
+        self.liste_suivis = curseur.fetchall()
 
         conn.close()
 
-        if s is None:
-            return  
+        self.combo_visites.blockSignals(True)
+        self.combo_visites.clear()
+
+        if self.liste_suivis:
+
+            for i, suivi in enumerate(self.liste_suivis):
+
+                date_visite = suivi[2] or "?"
+
+                self.combo_visites.addItem(
+                    f"Visite {i + 1} - {date_visite}"
+                )
+
+            self.label_visites.setVisible(True)
+            self.combo_visites.setVisible(True)
+
+            # On affiche la dernière visite par défaut
+            self.combo_visites.setCurrentIndex(
+                len(self.liste_suivis) - 1
+            )
+
+            self.charger_suivi(self.liste_suivis[-1])
+
+        else:
+
+            self.label_visites.setVisible(False)
+            self.combo_visites.setVisible(False)
+
+        self.combo_visites.blockSignals(False)
+
+    def changer_visite(self, index):
+
+        if index < 0 or index >= len(self.liste_suivis):
+            return
+
+        self.charger_suivi(self.liste_suivis[index])
+
+    def charger_suivi(self, s):
+
+        self.page_identite.date_consultation.setDate(
+            QDate.fromString(s[2], "yyyy-MM-dd")
+        )
+
+        self.page_identite.age.setText(s[3] or "")
+        self.page_identite.poids.setText(s[4] or "")
+
+        self.page_examen.ta.setText(s[5] or "")
+        self.page_examen.fc.setText(s[6] or "")
+        self.page_examen.temperature.setText(s[7] or "")
+        self.page_examen.sao2.setText(s[8] or "")
+        self.page_examen.glycemie.setText(s[9] or "")
+        self.page_examen.bhcg.setText(s[10] or "")
+        self.page_examen.bu.setText(s[11] or "")
+        self.page_examen.hu.setText(s[12] or "")
+        self.page_examen.auscultation.setPlainText(s[13] or "")
+        self.page_examen.examen.setPlainText(s[14] or "")
+
+        if s[15]:
+            self.page_echo.type_grossesse.setCurrentText(s[15])
+
+        if s[16]:
+            self.page_echo.evolution.setCurrentText(s[16])
+
+        if s[17]:
+            self.page_echo.presentation.setCurrentText(s[17])
+
+        self.page_echo.lcc.setText(s[18] or "")
+        self.page_echo.bip.setText(s[19] or "")
+        self.page_echo.lf.setText(s[20] or "")
+        self.page_echo.placenta.setText(s[21] or "")
+        self.page_echo.liquide.setText(s[22] or "")
+        self.page_echo.bcf.setText(s[23] or "")
+        self.page_echo.maf.setText(s[24] or "")
+
+        self.page_prescription.ordonnance.setPlainText(s[25] or "")
+        self.page_prescription.bilans.setPlainText(s[26] or "")
+        self.page_prescription.facture.setPlainText(s[27] or "")
+        self.page_prescription.observations.setPlainText(s[28] or "")
+        self.page_prescription.mutuelle.setChecked(bool(s[29]))
 
     def sauvegarder_grossesse(self, d):
 

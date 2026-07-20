@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
+    QLineEdit,
 )
 
 class FenetreGrossessesEnCours(QWidget):
@@ -27,13 +28,20 @@ class FenetreGrossessesEnCours(QWidget):
 
         layout.addWidget(titre)
 
+        self.recherche = QLineEdit()
+        self.recherche.setPlaceholderText(
+            "Rechercher par nom ou prénom..."
+        )
+        layout.addWidget(self.recherche)
+
         self.table = QTableWidget()
 
-        self.table.setColumnCount(2)
+        self.table.setColumnCount(3)
 
         self.table.setHorizontalHeaderLabels([
             "Patiente",
-            "DPA"
+            "DPA",
+            "Visites"
         ])
 
         layout.addWidget(self.table)
@@ -51,6 +59,8 @@ class FenetreGrossessesEnCours(QWidget):
             lambda row, column: self.ouvrir_dossier()
         )
 
+        self.recherche.textChanged.connect(self.filtrer)
+
     def charger_grossesses(self):
 
         self.table.setRowCount(0)
@@ -66,14 +76,20 @@ class FenetreGrossessesEnCours(QWidget):
             patients.nom,
             patients.prenom,
             grossesses.ddr,
-            grossesses.dpa
+            grossesses.dpa,
+            COUNT(suivi_grossesse.id)
 
         FROM grossesses
 
         JOIN patients
         ON patients.id = grossesses.patient_id
 
-        WHERE statut='En cours'
+        LEFT JOIN suivi_grossesse
+        ON suivi_grossesse.grossesse_id = grossesses.id
+
+        WHERE grossesses.statut='En cours'
+
+        GROUP BY grossesses.id
 
         ORDER BY grossesses.id DESC
 
@@ -105,6 +121,15 @@ class FenetreGrossessesEnCours(QWidget):
                 )
             )
 
+            # Colonne Visites
+            self.table.setItem(
+                ligne,
+                2,
+                QTableWidgetItem(
+                    str(grossesse[6])
+                )
+            )
+
             # On mémorise les identifiants dans la première colonne
             self.table.item(ligne, 0).setData(
                 1,
@@ -112,6 +137,22 @@ class FenetreGrossessesEnCours(QWidget):
                     grossesse[0],   # grossesse_id
                     grossesse[1]    # patient_id
                 )
+            )
+
+    def filtrer(self):
+
+        texte = self.recherche.text().lower().strip()
+
+        for ligne in range(self.table.rowCount()):
+
+            item = self.table.item(ligne, 0)
+
+            if item is None:
+                continue
+
+            self.table.setRowHidden(
+                ligne,
+                texte not in item.text().lower()
             )
 
     def ouvrir_dossier(self):

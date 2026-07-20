@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QStackedWidget,
     QMessageBox,
+    QScrollArea,
 )
 
 import sqlite3
@@ -79,10 +80,15 @@ class FenetreConsultation(QWidget):
         self.pages.addWidget(self.page_general)
         self.pages.addWidget(self.page_examens)
         self.pages.addWidget(self.page_prescription)
-        
+
+        # ================= ZONE DÉFILANTE =================
+
+        zone_defilante = QScrollArea()
+        zone_defilante.setWidgetResizable(True)
+        zone_defilante.setWidget(self.pages)
 
         layout_principal.addLayout(menu, 1)
-        layout_principal.addWidget(self.pages, 4)
+        layout_principal.addWidget(zone_defilante, 4)
 
         self.setLayout(layout_principal)
 
@@ -119,6 +125,18 @@ class FenetreConsultation(QWidget):
                 "Erreur",
                 "Aucun patient sélectionné."
             )
+            return
+
+        reponse = QMessageBox.question(
+            self,
+            "Confirmation",
+            "Êtes-vous sûr(e) de ne pas vouloir donner "
+            "un nouveau contrôle à ce patient ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reponse != QMessageBox.Yes:
             return
 
         donnees = self.recuperer_donnees()
@@ -623,4 +641,4 @@ class FenetreConsultation(QWidget):
             "Consultation"
         )
 
-        self.controle.show()    
+        self.controle.show()

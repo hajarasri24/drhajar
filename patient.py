@@ -34,17 +34,17 @@ class FenetrePatient(QWidget):
         formulaire = QFormLayout()
 
         self.nom = QLineEdit()
-        formulaire.addRow("Nom :", self.nom)
+        formulaire.addRow("Nom *:", self.nom)
 
         self.prenom = QLineEdit()
-        formulaire.addRow("Prénom :", self.prenom)
+        formulaire.addRow("Prénom *:", self.prenom)
 
         self.sexe = QComboBox()
         self.sexe.addItems(["Femme", "Homme"])
         formulaire.addRow("Sexe :", self.sexe)
 
         self.cni = QLineEdit()
-        formulaire.addRow("CNI :", self.cni)
+        formulaire.addRow("CNI *:", self.cni)
 
         self.telephone = QLineEdit()
         formulaire.addRow("Téléphone :", self.telephone)
@@ -78,7 +78,7 @@ class FenetrePatient(QWidget):
         ligne_naissance.addWidget(self.age)
 
         formulaire.addRow(
-            "Date de naissance :",
+            "Date de naissance *:",
             ligne_naissance
         )
 
@@ -94,8 +94,27 @@ class FenetrePatient(QWidget):
         ])
 
         formulaire.addRow(
-            "Couverture médicale :",
+            "Couverture médicale *:",
             self.couverture
+        )
+
+        self.autre_couverture = QLineEdit()
+        self.autre_couverture.setPlaceholderText(
+            "Précisez l'assurance..."
+        )
+
+        self.label_autre_couverture = QLabel("Préciser :")
+
+        formulaire.addRow(
+            self.label_autre_couverture,
+            self.autre_couverture
+        )
+
+        self.label_autre_couverture.setVisible(False)
+        self.autre_couverture.setVisible(False)
+
+        self.couverture.currentTextChanged.connect(
+            self.basculer_autre_couverture
         )
 
         self.marital = QComboBox()
@@ -109,11 +128,35 @@ class FenetrePatient(QWidget):
 
         layout.addLayout(formulaire)
 
+        note = QLabel("* Champs obligatoires")
+        note.setStyleSheet("color:gray; font-style:italic;")
+        layout.addWidget(note)
+
         self.bouton_enregistrer = QPushButton("💾 Enregistrer le patient")
         self.bouton_enregistrer.clicked.connect(self.enregistrer)
         layout.addWidget(self.bouton_enregistrer)
 
         self.setLayout(layout)
+
+    def basculer_autre_couverture(self, texte):
+
+        est_autre = (texte == "Autre")
+
+        self.label_autre_couverture.setVisible(est_autre)
+        self.autre_couverture.setVisible(est_autre)
+
+    def couverture_finale(self):
+
+        if self.couverture.currentText() == "Autre":
+
+            precision = self.autre_couverture.text().strip()
+
+            if precision:
+                return precision
+
+            return "Autre"
+
+        return self.couverture.currentText()
 
     def calculer_age(self):
 
@@ -135,6 +178,36 @@ class FenetrePatient(QWidget):
         self.age.setText(f"({age} ans)")
 
     def enregistrer(self):
+
+        champs_manquants = []
+
+        if not self.nom.text().strip():
+            champs_manquants.append("Nom")
+
+        if not self.prenom.text().strip():
+            champs_manquants.append("Prénom")
+
+        if not self.cni.text().strip():
+            champs_manquants.append("CNI")
+
+        if (
+            self.couverture.currentText() == "Autre"
+            and not self.autre_couverture.text().strip()
+        ):
+            champs_manquants.append(
+                "Couverture médicale (préciser laquelle)"
+            )
+
+        if champs_manquants:
+
+            QMessageBox.warning(
+                self,
+                "Champs obligatoires manquants",
+                "Veuillez remplir les champs suivants avant "
+                "d'enregistrer le patient :\n\n- " +
+                "\n- ".join(champs_manquants)
+            )
+            return
 
         conn = sqlite3.connect("drhajar.db")
         curseur = conn.cursor()
@@ -161,7 +234,7 @@ class FenetrePatient(QWidget):
             self.telephone.text(),
             self.adresse.text(),
             self.naissance.date().toString("yyyy-MM-dd"),
-            self.couverture.currentText(),
+            self.couverture_finale(),
             self.marital.currentText()
         ))
 
@@ -186,7 +259,7 @@ class FenetrePatient(QWidget):
             self.telephone.text(),
             self.adresse.text(),
             self.naissance.date().toString("yyyy-MM-dd"),
-            self.couverture.currentText(),
+            self.couverture_finale(),
             self.marital.currentText()
         )
 
