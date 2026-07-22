@@ -181,6 +181,33 @@ def creer_tables():
 
     )
     """)
+    
+    # ==========================================================
+    # TABLE ORDONNANCES
+    # ==========================================================
+
+    curseur.execute("""
+    CREATE TABLE IF NOT EXISTS ordonnances (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type_source TEXT NOT NULL,          -- 'consultation' ou 'grossesse'
+        source_id INTEGER NOT NULL,         -- consultation_id ou suivi_grossesse_id
+        date_creation TEXT,
+        nom_patient TEXT,
+        poids TEXT
+    )
+    """)
+
+    curseur.execute("""
+    CREATE TABLE IF NOT EXISTS ordonnance_lignes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ordonnance_id INTEGER NOT NULL,
+        medicament TEXT NOT NULL,
+        posologie TEXT,
+        duree TEXT,
+        ordre INTEGER DEFAULT 0,
+        FOREIGN KEY(ordonnance_id) REFERENCES ordonnances(id)
+    )
+    """)
 
     # ==========================================================
     # MISES À JOUR AUTOMATIQUES

@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QComboBox,
 )
-
+from ordonnance_preview import OrdonnancePreviewDialog
 from PySide6.QtCore import QDate
 
 import sqlite3
@@ -59,7 +59,7 @@ class FenetreGrossesse(QWidget):
         self.btn_examen = QPushButton("🩺 Examen clinique")
         self.btn_echo = QPushButton("👶 Échographie")
         self.btn_prescription = QPushButton("💊 Prescription")
-
+        
         menu.addWidget(self.btn_identite)
         menu.addWidget(self.btn_examen)
         menu.addWidget(self.btn_echo)
@@ -81,6 +81,10 @@ class FenetreGrossesse(QWidget):
         self.page_examen = GrossesseExamenPage()
         self.page_echo = GrossesseEchoPage()
         self.page_prescription = GrossessePrescriptionPage()
+        
+        self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
+        self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
+
 
         # Remplissage automatique du nom de la patiente
         if self.patient:
@@ -290,8 +294,8 @@ class FenetreGrossesse(QWidget):
 
             # ================= PRESCRIPTION =================
 
-            "ordonnance":
-                self.page_prescription.ordonnance.toPlainText(),
+            "ordonnance_lignes":
+                self.page_prescription.get_ordonnance_lignes(),
 
             "bilans":
                 self.page_prescription.bilans.toPlainText(),
@@ -440,11 +444,38 @@ class FenetreGrossesse(QWidget):
         self.page_echo.bcf.setText(s[23] or "")
         self.page_echo.maf.setText(s[24] or "")
 
-        self.page_prescription.ordonnance.setPlainText(s[25] or "")
+        self.page_prescription.set_ordonnance_lignes(
+            self.charger_ordonnance_lignes_suivi(s[0])
+        )
         self.page_prescription.bilans.setPlainText(s[26] or "")
         self.page_prescription.facture.setPlainText(s[27] or "")
         self.page_prescription.observations.setPlainText(s[28] or "")
         self.page_prescription.mutuelle.setChecked(bool(s[29]))
+        
+    def charger_ordonnance_lignes_suivi(self, suivi_id):
+        conn = sqlite3.connect("drhajar.db")
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            SELECT ol.medicament, ol.posologie, ol.duree
+            FROM ordonnances o
+            JOIN ordonnance_lignes ol
+                ON ol.ordonnance_id = o.id
+            WHERE o.type_source = ? AND o.source_id = ?
+            ORDER BY ol.ordre ASC, ol.id ASC
+        """, ("grossesse", suivi_id))
+
+        lignes = [
+            {
+                "medicament": row[0] or "",
+                "posologie": row[1] or "",
+                "duree": row[2] or ""
+            }
+            for row in curseur.fetchall()
+        ]
+
+        conn.close()
+        return lignes
 
     def sauvegarder_grossesse(self, d):
 
@@ -504,104 +535,102 @@ class FenetreGrossesse(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            INSERT INTO suivi_grossesse (
+        INSERT INTO suivi_grossesse (
 
-                grossesse_id,
+        grossesse_id,
 
-                date_consultation,
+        date_consultation,
 
-                age,
-                poids,
+        age,
+        poids,
 
-                ta,
-                fc,
-                temperature,
-                sao2,
-                glycemie,
-                bhcg,
-                bu,
-                hu,
+        ta,
+        fc,
+        temperature,
+        sao2,
+        glycemie,
+        bhcg,
+        bu,
+        hu,
 
-                auscultation,
-                examen,
+        auscultation,
+        examen,
 
-                type_grossesse,
-                evolution,
-                presentation,
-                lcc,
-                bip,
-                lf,
-                placenta,
-                liquide,
-                bcf,
-                maf,
+        type_grossesse,
+        evolution,
+        presentation,
+        lcc,
+        bip,
+        lf,
+        placenta,
+        liquide,
+        bcf,
+        maf,
 
-                ordonnance,
-                bilans,
-                facture,        
-                observations,
+        ordonnance,
+        bilans,
+        facture,
+        observations,
 
-                mutuelle_remplie
+        mutuelle_remplie
 
-            )
-            VALUES (
+        ) VALUES (
 
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?
 
-            )
+        )
         """, (
 
-            self.grossesse_id,
+        self.grossesse_id,
 
-            d["date_consultation"],
+        d["date_consultation"],
 
-            d["age"],
-            d["poids"],
+        d["age"],
+        d["poids"],
 
-            d["ta"],
-            d["fc"],
-            d["temperature"],
-            d["sao2"],
-            d["glycemie"],
-            d["bhcg"],
-            d["bu"],
-            d["hu"],
+        d["ta"],
+        d["fc"],
+        d["temperature"],
+        d["sao2"],
+        d["glycemie"],
+        d["bhcg"],
+        d["bu"],
+        d["hu"],
 
-            d["auscultation"],
-            d["examen"],
+        d["auscultation"],
+        d["examen"],
 
-            d["type_grossesse"],
-            d["evolution"],
-            d["presentation"],
-            d["lcc"],
-            d["bip"],
-            d["lf"],
-            d["placenta"],
-            d["liquide"],
-            d["bcf"],
-            d["maf"],
+        d["type_grossesse"],
+        d["evolution"],
+        d["presentation"],
+        d["lcc"],
+        d["bip"],
+        d["lf"],
+        d["placenta"],
+        d["liquide"],
+        d["bcf"],
+        d["maf"],
 
-            d["ordonnance"],
-            d["bilans"],
-            d["facture"],
-            d["observations"],
+        "",  # ancienne colonne ordonnance, remplacée par ordonnance_lignes
+        d["bilans"],
+        d["facture"],
+        d["observations"],
 
-            d["mutuelle"]
+        int(d["mutuelle"])
 
         ))
-        conn.commit()
 
-        curseur.execute("SELECT * FROM suivi_grossesse")
-        lignes = curseur.fetchall()
+        suivi_id = curseur.lastrowid
+        conn.commit()
         conn.close()
 
-        print("\n===== CONTENU SUIVI_GROSSESSE =====")
-        for ligne in lignes:
-            print(ligne)
-        print("==================================\n")
-
+        self.sauvegarder_ordonnance_structuree_suivi(
+            suivi_id,
+            d["ordonnance_lignes"]
+        )
+        
     def grossesse_existe(self):
 
         return self.grossesse_id is not None
@@ -665,6 +694,80 @@ class FenetreGrossesse(QWidget):
             "Grossesse"
 
         ))
+
+        conn.commit()
+        conn.close()
+        
+    def construire_donnees_ordonnance(self):
+        nom_patient = f"{self.patient[1]} {self.patient[2]}".strip() if self.patient else ""
+        date_du_jour = QDate.currentDate().toString("dd-MM-yyyy")
+        poids = self.page_identite.poids.text().strip()
+
+        return {
+            "nom_patient": nom_patient,
+            "date": date_du_jour,
+            "poids": poids,
+            "lignes": self.page_prescription.get_ordonnance_lignes()
+        }
+        
+    
+    def apercu_ordonnance(self):
+        donnees = self.construire_donnees_ordonnance()
+        if not donnees["lignes"]:
+            QMessageBox.warning(
+                self,
+                "Ordonnance vide",
+                "Veuillez ajouter au moins un médicament."
+            )
+            return
+
+        dlg = OrdonnancePreviewDialog(donnees, "ordonance.pdf", self)
+        dlg.exec()
+
+    def imprimer_ordonnance(self):
+        donnees = self.construire_donnees_ordonnance()
+        if not donnees["lignes"]:
+            QMessageBox.warning(
+                self,
+                "Ordonnance vide",
+                "Veuillez ajouter au moins un médicament."
+            )
+            return
+
+        dlg = OrdonnancePreviewDialog(donnees, "ordonance.pdf", self)
+        dlg.print_document()
+        
+    def sauvegarder_ordonnance_structuree_suivi(self, suivi_id, lignes):
+        if not lignes:
+            return
+
+        conn = sqlite3.connect("drhajar.db")
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            INSERT INTO ordonnances (type_source, source_id, date_creation, nom_patient, poids)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            "grossesse",
+            suivi_id,
+            QDate.currentDate().toString("yyyy-MM-dd"),
+            f"{self.patient[1]} {self.patient[2]}".strip(),
+            self.page_identite.poids.text().strip()
+        ))
+
+        ordonnance_id = curseur.lastrowid
+
+        for i, ligne in enumerate(lignes):
+            curseur.execute("""
+                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, ordre)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                ordonnance_id,
+                ligne["medicament"],
+                ligne["posologie"],
+                ligne["duree"],
+                i
+            ))
 
         conn.commit()
         conn.close()

@@ -14,7 +14,7 @@ from utils import calculer_age, format_date
 from choisir_date import ChoisirDate
 
 from PySide6.QtCore import QDate
-
+from ordonnance_preview import OrdonnancePreviewDialog
 from pages.consultation_page import ConsultationPage
 from pages.examen_general import ExamenGeneralPage
 from pages.examens_cliniques import ExamensCliniquesPage
@@ -70,6 +70,9 @@ class FenetreConsultation(QWidget):
         self.page_general = ExamenGeneralPage()
         self.page_examens = ExamensCliniquesPage()
         self.page_prescription = PrescriptionPage()
+        
+        self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
+        self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
 
         self.page_consultation.definir_patient(self.patient)
 
@@ -244,8 +247,8 @@ class FenetreConsultation(QWidget):
             "examens":
                 self.page_prescription.examens.toPlainText(),
 
-            "ordonnance":
-                self.page_prescription.ordonnance.toPlainText(),
+            "ordonnance_lignes":
+                self.page_prescription.get_ordonnance_lignes(),
 
             "facture":
                 self.page_prescription.facture.toPlainText(),
@@ -259,78 +262,120 @@ class FenetreConsultation(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            INSERT INTO consultations (
-                patient_id,
-                date_consultation,
-                motif,
-                signes_fonctionnels,
-                atcd,        
-                histoire_maladie,
-                poids,
-                taille,
-                ta,
-                temperature,
-                sao2,
-                fc,
-                fr,
-                conjonctives,
-                dextro,
-                bu,
-                autres,
-                cardiovasculaire,
-                pleuro_pulmonaire,
-                orl,
-                abdominal,
-                aires_ganglionnaires,
-                neurologique,
-                cutaneo_muqueux,
-                locomoteur,
-                uro_genital,
-                gynecologique,
-                gestes_medicaux,
-                examens_complementaires,
-                ordonnance,
-                facture,
-                mutuelle_remplie
-            )
-            VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-            )
+        INSERT INTO consultations (
+        patient_id,
+        date_consultation,
+        motif,
+        signes_fonctionnels,
+        atcd,
+        histoire_maladie,
+        poids,
+        taille,
+        ta,
+        temperature,
+        sao2,
+        fc,
+        fr,
+        conjonctives,
+        dextro,
+        bu,
+        autres,
+        cardiovasculaire,
+        pleuro_pulmonaire,
+        orl,
+        abdominal,
+        aires_ganglionnaires,
+        neurologique,
+        cutaneo_muqueux,
+        locomoteur,
+        uro_genital,
+        gynecologique,
+        gestes_medicaux,
+        examens_complementaires,
+        ordonnance,
+        facture,
+        mutuelle_remplie
+        )
+
+        VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )
         """, (
-            d["patient_id"],
-            d["date_consultation"],
-            d["motif"],
-            d["signes"],
-            d["atcd"],
-            d["histoire"],
-            d["poids"],
-            d["taille"],
-            d["ta"],
-            d["temperature"],
-            d["sao2"],
-            d["fc"],
-            d["fr"],
-            d["conjonctives"],
-            d["dextro"],
-            d["bu"],
-            d["autres"],
-            d["cardiovasculaire"],
-            d["pleuro"],
-            d["orl"],
-            d["abdominal"],
-            d["ganglionnaire"],
-            d["neurologique"],
-            d["cutaneo"],
-            d["locomoteur"],
-            d["uro"],
-            d["gyneco"],
-            d["gestes"],
-            d["examens"],
-            d["ordonnance"],
-            d["facture"],
-            d["mutuelle"]
+        d["patient_id"],
+        d["date_consultation"],
+        d["motif"],
+        d["signes"],
+        d["atcd"],
+        d["histoire"],
+        d["poids"],
+        d["taille"],
+        d["ta"],
+        d["temperature"],
+        d["sao2"],
+        d["fc"],
+        d["fr"],
+        d["conjonctives"],
+        d["dextro"],
+        d["bu"],
+        d["autres"],
+        d["cardiovasculaire"],
+        d["pleuro"],
+        d["orl"],
+        d["abdominal"],
+        d["ganglionnaire"],
+        d["neurologique"],
+        d["cutaneo"],
+        d["locomoteur"],
+        d["uro"],
+        d["gyneco"],
+        d["gestes"],
+        d["examens"],
+        "",  # ancienne colonne ordonnance, remplacée par ordonnance_lignes
+        d["facture"],
+        int(d["mutuelle"])
         ))
+
+        consultation_id = curseur.lastrowid
+        conn.commit()
+        conn.close()
+
+        self.sauvegarder_ordonnance_structuree(
+            consultation_id,
+            d["ordonnance_lignes"]
+        )
+        
+    def sauvegarder_ordonnance_structuree(self, consultation_id, lignes):
+        if not lignes:
+            return
+
+        conn = sqlite3.connect("drhajar.db")
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            INSERT INTO ordonnances (type_source, source_id, date_creation, nom_patient, poids)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            "consultation",
+            consultation_id,
+            QDate.currentDate().toString("yyyy-MM-dd"),
+            f"{self.patient[1]} {self.patient[2]}",
+            self.page_general.poids.text().strip()
+        ))
+
+        ordonnance_id = curseur.lastrowid
+
+        for i, ligne in enumerate(lignes):
+            curseur.execute("""
+                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, ordre)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                ordonnance_id,
+                ligne["medicament"],
+                ligne["posologie"],
+                ligne["duree"],
+                i
+            ))
 
         conn.commit()
         conn.close()
@@ -414,15 +459,21 @@ class FenetreConsultation(QWidget):
             d["gestes"],
 
             d["examens"],
-            d["ordonnance"],
+            "",
             d["facture"],
-            d["mutuelle"],
-        self.consultation_id
+            int(d["mutuelle"]),
+            self.consultation_id
 
         ))
 
         conn.commit()
         conn.close()    
+        
+        self.supprimer_ordonnance_structuree_consultation(self.consultation_id)
+        self.sauvegarder_ordonnance_structuree(
+        self.consultation_id,
+        d["ordonnance_lignes"]
+)
 
     def charger_consultation(self, consultation_id):
 
@@ -596,8 +647,8 @@ class FenetreConsultation(QWidget):
             consultation[29] or ""
         )
 
-        self.page_prescription.ordonnance.setPlainText(
-            consultation[30] or ""
+        self.page_prescription.set_ordonnance_lignes(
+            self.charger_ordonnance_lignes_consultation(consultation_id)
         )
 
         self.page_prescription.facture.setPlainText(
@@ -607,6 +658,31 @@ class FenetreConsultation(QWidget):
         self.page_prescription.mutuelle.setChecked(
             bool(consultation[32])
         )
+        
+    def charger_ordonnance_lignes_consultation(self, consultation_id):
+        conn = sqlite3.connect("drhajar.db")
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            SELECT ol.medicament, ol.posologie, ol.duree
+            FROM ordonnances o
+            JOIN ordonnance_lignes ol
+                ON ol.ordonnance_id = o.id
+            WHERE o.type_source = ? AND o.source_id = ?
+            ORDER BY ol.ordre ASC, ol.id ASC
+        """, ("consultation", consultation_id))
+
+        lignes = [
+            {
+                "medicament": row[0] or "",
+                "posologie": row[1] or "",
+                "duree": row[2] or ""
+            }
+            for row in curseur.fetchall()
+        ]
+
+        conn.close()
+        return lignes
 
     def charger_dernier_atcd(self):
 
@@ -642,3 +718,81 @@ class FenetreConsultation(QWidget):
         )
 
         self.controle.show()
+        
+    def build_ordonnance_data(self):
+        nom_patient = f"{self.patient[1]} {self.patient[2]}".strip()
+        date_du_jour = QDate.currentDate().toString("dd-MM-yyyy")
+        poids = self.page_general.poids.text().strip()
+
+        return {
+            "nom_patient": nom_patient,
+            "date": date_du_jour,
+            "poids": poids,
+            "lignes": self.page_prescription.get_ordonnance_lignes()
+        }
+        
+    def apercu_ordonnance(self):
+        donnees = self.build_ordonnance_data()
+
+        if not donnees["lignes"]:
+            QMessageBox.warning(
+                self,
+                "Ordonnance vide",
+                "Veuillez ajouter au moins un médicament."
+            )
+            return
+
+        dlg = OrdonnancePreviewDialog(donnees, "ordonance.pdf", self)
+        dlg.exec()
+
+    def imprimer_ordonnance(self):
+        donnees = self.build_ordonnance_data()
+
+        if not donnees["lignes"]:
+            QMessageBox.warning(
+                self,
+                "Ordonnance vide",
+                "Veuillez ajouter au moins un médicament."
+            )
+            return
+
+        dlg = OrdonnancePreviewDialog(donnees, "ordonance.pdf", self)
+        dlg.print_document()
+
+    def build_ordonnance_data(self):
+        nom_patient = f"{self.patient[1]} {self.patient[2]}".strip() if self.patient else ""
+        date_du_jour = QDate.currentDate().toString("dd-MM-yyyy")
+        poids = self.page_general.poids.text().strip()
+
+        return {
+            "nom_patient": nom_patient,
+            "date": date_du_jour,
+            "poids": poids,
+            "lignes": self.page_prescription.get_ordonnance_lignes()
+        }
+        
+    def supprimer_ordonnance_structuree_consultation(self, consultation_id):
+        conn = sqlite3.connect("drhajar.db")
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            SELECT id
+            FROM ordonnances
+            WHERE type_source = ? AND source_id = ?
+        """, ("consultation", consultation_id))
+
+        ordonnance_ids = [row[0] for row in curseur.fetchall()]
+
+        for ordonnance_id in ordonnance_ids:
+            curseur.execute(
+                "DELETE FROM ordonnance_lignes WHERE ordonnance_id = ?",
+                (ordonnance_id,)
+            )
+
+        curseur.execute("""
+            DELETE FROM ordonnances
+            WHERE type_source = ? AND source_id = ?
+        """, ("consultation", consultation_id))
+
+        conn.commit()
+        conn.close()

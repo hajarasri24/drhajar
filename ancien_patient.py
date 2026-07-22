@@ -70,7 +70,7 @@ class FenetreAncienPatient(QWidget):
 
         for patient in self.patients:
             self.liste.addItem(
-                f"{patient[1]} {patient[2]}   |   {patient[4]}"
+                f"{patient[0]}   |   {patient[1]} {patient[2]}   |   {patient[4]}"
             )
 
     def filtrer(self):
