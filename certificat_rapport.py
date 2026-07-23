@@ -8,6 +8,9 @@ from PySide6.QtWidgets import (
 
 from rapport import FenetreRapport
 from certificat_ap import FenetreCertificatAP
+from certificat_mariage import FenetreCertificatMariage
+from certificat_medical import FenetreCertificatMedical
+from certificat_puberte import FenetreCertificatPuberte
 
 
 class FenetreCertificatRapport(QWidget):
@@ -51,6 +54,10 @@ class FenetreCertificatRapport(QWidget):
         self.bouton_certificat_medical.clicked.connect(self.ouvrir_certificat_medical)
         layout.addWidget(self.bouton_certificat_medical)
 
+        self.bouton_certificat_puberte = QPushButton("🌱 Certificat de puberté")
+        self.bouton_certificat_puberte.clicked.connect(self.ouvrir_certificat_puberte)
+        layout.addWidget(self.bouton_certificat_puberte)
+
         layout.addStretch()
 
         self.setLayout(layout)
@@ -69,16 +76,15 @@ class FenetreCertificatRapport(QWidget):
 
     def ouvrir_certificat_mariage(self):
 
-        QMessageBox.information(
-            self,
-            "À venir",
-            "Le certificat de mariage n'est pas encore disponible."
-        )
+        self.certificat_mariage = FenetreCertificatMariage()
+        self.certificat_mariage.show()
 
     def ouvrir_certificat_medical(self):
 
-        QMessageBox.information(
-            self,
-            "À venir",
-            "Le certificat médical n'est pas encore disponible."
-        )
+        self.certificat_medical = FenetreCertificatMedical()
+        self.certificat_medical.show()
+
+    def ouvrir_certificat_puberte(self):
+
+        self.certificat_puberte = FenetreCertificatPuberte()
+        self.certificat_puberte.show()

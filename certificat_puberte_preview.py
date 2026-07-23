@@ -23,8 +23,7 @@ except ImportError:
     QPdfDocument = None
 
 
-# Même repère que rapport_preview.py, pour rester cohérent avec
-# le positionnement déjà calé sur les modèles PDF.
+# Même repère que pour les autres documents.
 LARGEUR_REF = 1600
 HAUTEUR_REF = 2262
 
@@ -64,25 +63,25 @@ class PreviewWidget(QWidget):
             self.dialog._dessiner_contenu(painter, QRectF(page_rect))
 
 
-class CertificatAPPreviewDialog(QDialog):
-    def __init__(self, patient, date_du_jour="", template_pdf_path="documents/certificat_ap.pdf", parent=None):
+class CertificatPubertePreviewDialog(QDialog):
+    def __init__(self, patient, nom_arabe, date_du_jour="", template_pdf_path="documents/certificat_de_puberte.pdf", parent=None):
         super().__init__(parent)
 
         # patient = (id, nom, prenom, cni)
-        self.nom = str(patient[1])
-        self.prenom = str(patient[2])
+        self.nom_fr = f"{patient[2]} {patient[1]}".title()
         self.cni = str(patient[3])
+        self.nom_arabe = nom_arabe
 
         self.date_du_jour = date_du_jour
         self.template_pdf_path = template_pdf_path
         self.template_pixmap = self._charger_template_depuis_pdf()
 
-        self.setWindowTitle("Aperçu du certificat d'AP")
+        self.setWindowTitle("Aperçu du certificat de puberté")
         self.resize(900, 1200)
 
         layout = QVBoxLayout(self)
 
-        self.info = QLabel("Aperçu du certificat d'AP")
+        self.info = QLabel("Aperçu du certificat de puberté")
         self.info.setAlignment(Qt.AlignCenter)
         self.info.setStyleSheet("font-size:16px; font-weight:bold;")
         layout.addWidget(self.info)
@@ -178,30 +177,49 @@ class CertificatAPPreviewDialog(QDialog):
         painter.setPen(QPen(noir))
 
         font_champs = QFont("Verdana")
-        font_champs.setPointSizeF(16)
+        font_champs.setPointSizeF(14)
         font_champs.setBold(True)
         painter.setFont(font_champs)
 
-        # ================= CNI (sur la ligne "CIN :") =================
-        if self.cni != "mineur" and self.cni != "Mineur":
-            painter.drawText(
-                QRectF(x(1240), y(700), 300 * sx, 60 * sy),
-                Qt.AlignLeft | Qt.AlignBottom,
-                self.cni
-            )
-
-        # ================= NOM ET PRÉNOM (sur la ligne "dénommé(e)") =================
+        # ================= NOM EN FRANÇAIS (sur la ligne "Nom :") =================
 
         painter.drawText(
-            QRectF(x(750), y(995), 730 * sx, 60 * sy),
+            QRectF(x(210), y(695), 520 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
-            f"{self.prenom} {self.nom}".title()
+            self.nom_fr
         )
 
-        # ================= DATE (sur la ligne "Fait à ... le") =================
+        # ================= DATE #1 (sur la ligne "Le :") =================
 
         painter.drawText(
-            QRectF(x(1000), y(1688), 560 * sx, 60 * sy),
+            QRectF(x(1100), y(695), 520 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.date_du_jour
         )
+
+        # ================= DATE #2 =================
+        # (sur la ligne "أشهد بأنني قمت يومه ... بطلب منه/منها :")
+
+        painter.drawText(
+            QRectF(x(700), y(1021), 823 * sx, 60 * sy),
+            Qt.AlignLeft | Qt.AlignBottom,
+            self.date_du_jour
+        )
+
+        # ================= NOM EN ARABE =================
+        # (sur la ligne "بفحص المسمى/ المسماة :")
+
+        painter.drawText(
+            QRectF(x(700), y(1191), 1063 * sx, 60 * sy),
+            Qt.AlignLeft | Qt.AlignBottom,
+            self.nom_arabe
+        )
+
+        # ================= CNI =================
+        # (sur la ligne "الحامل للبطاقة الوطنية رقم :")
+        if self.cni != "Mineur" and self.cni != "mineur" :
+            painter.drawText(
+                QRectF(x(500), y(1358), 1028 * sx, 60 * sy),
+                Qt.AlignLeft | Qt.AlignBottom,
+                self.cni
+            )

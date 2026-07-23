@@ -23,8 +23,7 @@ except ImportError:
     QPdfDocument = None
 
 
-# Même repère que rapport_preview.py, pour rester cohérent avec
-# le positionnement déjà calé sur les modèles PDF.
+# Même repère que pour les autres documents (rapport, certificat d'AP).
 LARGEUR_REF = 1600
 HAUTEUR_REF = 2262
 
@@ -64,25 +63,27 @@ class PreviewWidget(QWidget):
             self.dialog._dessiner_contenu(painter, QRectF(page_rect))
 
 
-class CertificatAPPreviewDialog(QDialog):
-    def __init__(self, patient, date_du_jour="", template_pdf_path="documents/certificat_ap.pdf", parent=None):
+class CertificatMedicalPreviewDialog(QDialog):
+    def __init__(self, patient, jours, date_du_jour="", date_debut="", date_fin="", template_pdf_path="documents/certificat_medical.pdf", parent=None):
         super().__init__(parent)
 
         # patient = (id, nom, prenom, cni)
         self.nom = str(patient[1])
         self.prenom = str(patient[2])
-        self.cni = str(patient[3])
+        self.jours = str(jours)
+        self.date_debut = date_debut
+        self.date_fin = date_fin
 
         self.date_du_jour = date_du_jour
         self.template_pdf_path = template_pdf_path
         self.template_pixmap = self._charger_template_depuis_pdf()
 
-        self.setWindowTitle("Aperçu du certificat d'AP")
+        self.setWindowTitle("Aperçu du certificat médical")
         self.resize(900, 1200)
 
         layout = QVBoxLayout(self)
 
-        self.info = QLabel("Aperçu du certificat d'AP")
+        self.info = QLabel("Aperçu du certificat médical")
         self.info.setAlignment(Qt.AlignCenter)
         self.info.setStyleSheet("font-size:16px; font-weight:bold;")
         layout.addWidget(self.info)
@@ -182,26 +183,47 @@ class CertificatAPPreviewDialog(QDialog):
         font_champs.setBold(True)
         painter.setFont(font_champs)
 
-        # ================= CNI (sur la ligne "CIN :") =================
-        if self.cni != "mineur" and self.cni != "Mineur":
-            painter.drawText(
-                QRectF(x(1240), y(700), 300 * sx, 60 * sy),
-                Qt.AlignLeft | Qt.AlignBottom,
-                self.cni
-            )
-
-        # ================= NOM ET PRÉNOM (sur la ligne "dénommé(e)") =================
+        # ================= DATE (sur la ligne "Le :") =================
 
         painter.drawText(
-            QRectF(x(750), y(995), 730 * sx, 60 * sy),
+            QRectF(x(1100), y(600), 510 * sx, 60 * sy),
+            Qt.AlignLeft | Qt.AlignBottom,
+            self.date_du_jour
+        )
+
+        # ================= NOM ET PRÉNOM =================
+        # (sur la ligne "Certifie avoir examiné M.(Mme) (Mlle).")
+
+        painter.drawText(
+            QRectF(x(850), y(782), 713 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             f"{self.prenom} {self.nom}".title()
         )
 
-        # ================= DATE (sur la ligne "Fait à ... le") =================
+        # ================= NOMBRE DE JOURS =================
+        # (sur la ligne "arrêt de travail de ... jours")
 
         painter.drawText(
-            QRectF(x(1000), y(1688), 560 * sx, 60 * sy),
+            QRectF(x(1026), y(1000), 390 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
-            self.date_du_jour
+            self.jours
         )
+
+        # ================= DATES DE L'ARRÊT =================
+        # (sur la ligne "Du ....... au ....... ( inclus )")
+
+        if self.date_debut:
+
+            painter.drawText(
+                QRectF(x(270), y(1147), 583 * sx, 60 * sy),
+                Qt.AlignLeft | Qt.AlignBottom,
+                self.date_debut
+            )
+
+        if self.date_fin:
+
+            painter.drawText(
+                QRectF(x(920), y(1147), 540 * sx, 60 * sy),
+                Qt.AlignLeft | Qt.AlignBottom,
+                self.date_fin
+            )

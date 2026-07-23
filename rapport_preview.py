@@ -177,7 +177,7 @@ class RapportPreviewDialog(QDialog):
         # Zone de texte libre, entre l'en-tête et le pied de page.
 
         font_corps = QFont("Verdana")
-        font_corps.setPointSizeF(14)
+        font_corps.setPointSizeF(10)
         font_corps.setBold(True)
         painter.setFont(font_corps)
 
