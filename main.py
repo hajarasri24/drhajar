@@ -15,6 +15,7 @@ from patient import FenetrePatient
 from ancien_patient import FenetreAncienPatient
 from grossesses_en_cours import FenetreGrossessesEnCours
 from agenda import FenetreAgenda
+from certificat_rapport import FenetreCertificatRapport
 
 creer_tables()
 
@@ -58,6 +59,12 @@ def ouvrir_agenda():
     fenetre.agenda.show()    
 
 
+def ouvrir_certificat_rapport():
+
+    fenetre.certificat_rapport = FenetreCertificatRapport()
+    fenetre.certificat_rapport.show()
+
+
 bouton_nouveau = QPushButton("➕ Ajouter un nouveau patient")
 bouton_nouveau.clicked.connect(ouvrir_nouveau_patient)
 layout.addWidget(bouton_nouveau)
@@ -73,6 +80,10 @@ layout.addWidget(bouton_grossesse)
 bouton_agenda = QPushButton("📅 Agenda des contrôles")
 bouton_agenda.clicked.connect(ouvrir_agenda)
 layout.addWidget(bouton_agenda)
+
+bouton_certificat_rapport = QPushButton("📄 Certificat / Rapport")
+bouton_certificat_rapport.clicked.connect(ouvrir_certificat_rapport)
+layout.addWidget(bouton_certificat_rapport)
 
 bouton_quitter = QPushButton("❌ Quitter")
 bouton_quitter.clicked.connect(app.quit)

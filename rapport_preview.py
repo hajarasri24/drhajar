@@ -23,11 +23,17 @@ except ImportError:
     QPdfDocument = None
 
 
+# Taille de référence utilisée pour positionner le contenu.
+# Elle correspond aux proportions d'une page A4 (595.276 x 841.89 pt).
+LARGEUR_REF = 1600
+HAUTEUR_REF = 2262
+
+
 class PreviewWidget(QWidget):
     def __init__(self, dialog):
         super().__init__()
         self.dialog = dialog
-        self.setMinimumSize(780, 1100)
+        self.setMinimumSize(780, 900)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -58,20 +64,21 @@ class PreviewWidget(QWidget):
             self.dialog._dessiner_contenu(painter, QRectF(page_rect))
 
 
-class OrdonnancePreviewDialog(QDialog):
-    def __init__(self, ordonnance_data, template_pdf_path="documents/ordonance.pdf", parent=None):
+class RapportPreviewDialog(QDialog):
+    def __init__(self, texte, date_du_jour="", template_pdf_path="documents/blank_page.pdf", parent=None):
         super().__init__(parent)
 
-        self.ordonnance_data = ordonnance_data
+        self.texte = texte
+        self.date_du_jour = date_du_jour
         self.template_pdf_path = template_pdf_path
         self.template_pixmap = self._charger_template_depuis_pdf()
 
-        self.setWindowTitle("Aperçu de l'ordonnance")
+        self.setWindowTitle("Aperçu du rapport")
         self.resize(900, 1200)
 
         layout = QVBoxLayout(self)
 
-        self.info = QLabel("Aperçu de l'ordonnance")
+        self.info = QLabel("Aperçu du rapport")
         self.info.setAlignment(Qt.AlignCenter)
         self.info.setStyleSheet("font-size:16px; font-weight:bold;")
         layout.addWidget(self.info)
@@ -104,7 +111,7 @@ class OrdonnancePreviewDialog(QDialog):
         if document.status() != QPdfDocument.Status.Ready:
             return QPixmap()
 
-        image = document.render(0, QSize(1600, 2260))
+        image = document.render(0, QSize(LARGEUR_REF, HAUTEUR_REF))
         if image.isNull():
             return QPixmap()
 
@@ -154,8 +161,8 @@ class OrdonnancePreviewDialog(QDialog):
         painter.end()
 
     def _dessiner_contenu(self, painter, page_rect):
-        sx = page_rect.width() / 1600.0
-        sy = page_rect.height() / 1980.0
+        sx = page_rect.width() / LARGEUR_REF
+        sy = page_rect.height() / HAUTEUR_REF
 
         def x(v):
             return page_rect.x() + v * sx
@@ -166,61 +173,23 @@ class OrdonnancePreviewDialog(QDialog):
         noir = QColor(20, 20, 20)
         painter.setPen(QPen(noir))
 
-        nom_patient = self.ordonnance_data.get("nom_patient", "").title()
-        date_du_jour = self.ordonnance_data.get("date", "")
-        poids_brut = self.ordonnance_data.get("poids", "").strip()
-        poids = f"{poids_brut} Kg" if poids_brut else ""
-        lignes = self.ordonnance_data.get("lignes", [])
+        # ================= CORPS DU RAPPORT =================
+        # Zone de texte libre, entre l'en-tête et le pied de page.
 
-        font_nom = QFont("Verdana")
-        font_nom.setPointSizeF(14)
-        font_nom.setBold(True)
-        painter.setFont(font_nom)
+        font_corps = QFont("Verdana")
+        font_corps.setPointSizeF(14)
+        font_corps.setBold(True)
+        painter.setFont(font_corps)
 
-        painter.drawText(
-            QRectF(x(355), y(477), 520 * sx, 50 * sy),
-            Qt.AlignLeft | Qt.AlignVCenter,
-            nom_patient
-        )
-
-        font_infos = QFont("Verdana")
-        font_infos.setPointSizeF(14)
-        font_infos.setBold(True)
-        painter.setFont(font_infos)
-
-        painter.drawText(
-            QRectF(x(1100), y(477), 250 * sx, 50 * sy),
-            Qt.AlignLeft | Qt.AlignVCenter,
-            date_du_jour
+        zone_texte = QRectF(
+            x(145),
+            y(560),
+            1300 * sx,
+            1340 * sy
         )
 
         painter.drawText(
-            QRectF(x(450), y(550), 260 * sx, 50 * sy),
-            Qt.AlignLeft | Qt.AlignVCenter,
-            poids
+            zone_texte,
+            Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
+            self.texte
         )
-
-        font_lignes = QFont("Verdana")
-        font_lignes.setPointSizeF(14)
-        font_lignes.setBold(True)
-        painter.setFont(font_lignes)
-
-        top_depart = y(800)
-        interligne = 150 * sy
-        hauteur_bloc = 90 * sy
-
-        for i, ligne in enumerate(lignes, start=1):
-            yy = top_depart + (i - 1) * interligne
-
-            texte = (
-                f"{i}. {ligne.get('medicament', '').strip()} - "
-                f"    {ligne.get('posologie', '').strip()} - "
-                f"{ligne.get('duree', '').strip()}\n"
-                f"     {ligne.get('remarque', '').strip()}"
-            )
-
-            painter.drawText(
-                QRectF(x(145), yy, 1300 * sx, hauteur_bloc),
-                Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
-                texte
-            )

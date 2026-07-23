@@ -28,6 +28,11 @@ class LigneMedicament(QWidget):
         self.duree.setPlaceholderText("Ex: 7 jours")
         self.duree.setMinimumHeight(30)
         self.duree.setMaximumHeight(30)
+        
+        self.remarque = QLineEdit()
+        self.remarque.setPlaceholderText("Ex: Remarque")
+        self.remarque.setMinimumHeight(30)
+        self.remarque.setMaximumHeight(30)
 
         self.btn_supprimer = QPushButton("✕")
         self.btn_supprimer.setFixedSize(30, 30)
@@ -35,6 +40,7 @@ class LigneMedicament(QWidget):
         layout.addWidget(self.medicament, 3)
         layout.addWidget(self.posologie, 2)
         layout.addWidget(self.duree, 2)
+        layout.addWidget(self.remarque, 2)
         layout.addWidget(self.btn_supprimer)
 
     def get_data(self):
@@ -42,9 +48,11 @@ class LigneMedicament(QWidget):
             "medicament": self.medicament.text().strip(),
             "posologie": self.posologie.text().strip(),
             "duree": self.duree.text().strip(),
+            "remarque": self.remarque.text().strip(),
         }
 
     def set_data(self, data):
         self.medicament.setText(data.get("medicament", ""))
         self.posologie.setText(data.get("posologie", ""))
         self.duree.setText(data.get("duree", ""))
+        self.remarque.setText(data.get("remarque", ""))

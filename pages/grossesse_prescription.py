@@ -114,6 +114,7 @@ class GrossessePrescriptionPage(QWidget):
             ligne.medicament.clear()
             ligne.posologie.clear()
             ligne.duree.clear()
+            ligne.remarque.clear()
             return
 
         self.lignes_medicaments.remove(ligne)

@@ -457,7 +457,7 @@ class FenetreGrossesse(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            SELECT ol.medicament, ol.posologie, ol.duree
+            SELECT ol.medicament, ol.posologie, ol.duree, ol.remarque
             FROM ordonnances o
             JOIN ordonnance_lignes ol
                 ON ol.ordonnance_id = o.id
@@ -469,7 +469,8 @@ class FenetreGrossesse(QWidget):
             {
                 "medicament": row[0] or "",
                 "posologie": row[1] or "",
-                "duree": row[2] or ""
+                "duree": row[2] or "",
+                "remarque": row[3] or ""
             }
             for row in curseur.fetchall()
         ]
@@ -721,7 +722,7 @@ class FenetreGrossesse(QWidget):
             )
             return
 
-        dlg = OrdonnancePreviewDialog(donnees, "ordonance.pdf", self)
+        dlg = OrdonnancePreviewDialog(donnees, "documents/ordonance.pdf", self)
         dlg.exec()
 
     def imprimer_ordonnance(self):
@@ -734,7 +735,7 @@ class FenetreGrossesse(QWidget):
             )
             return
 
-        dlg = OrdonnancePreviewDialog(donnees, "ordonance.pdf", self)
+        dlg = OrdonnancePreviewDialog(donnees, "documents/ordonance.pdf", self)
         dlg.print_document()
         
     def sauvegarder_ordonnance_structuree_suivi(self, suivi_id, lignes):
@@ -759,13 +760,14 @@ class FenetreGrossesse(QWidget):
 
         for i, ligne in enumerate(lignes):
             curseur.execute("""
-                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, ordre)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, remarque, ordre)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 ordonnance_id,
                 ligne["medicament"],
                 ligne["posologie"],
                 ligne["duree"],
+                ligne["remarque"],
                 i
             ))
 

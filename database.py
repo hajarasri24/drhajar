@@ -204,6 +204,7 @@ def creer_tables():
         medicament TEXT NOT NULL,
         posologie TEXT,
         duree TEXT,
+        remarque TEXT,
         ordre INTEGER DEFAULT 0,
         FOREIGN KEY(ordonnance_id) REFERENCES ordonnances(id)
     )
