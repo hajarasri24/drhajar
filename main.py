@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from PySide6.QtCore import Qt
-
+from theme import apply_theme
 from database import creer_tables
 from patient import FenetrePatient
 from ancien_patient import FenetreAncienPatient
@@ -20,6 +20,7 @@ from certificat_rapport import FenetreCertificatRapport
 creer_tables()
 
 app = QApplication(sys.argv)
+apply_theme(app)
 
 fenetre = QWidget()
 fenetre.setWindowTitle("DrHajar")
@@ -28,9 +29,9 @@ fenetre.resize(700, 500)
 layout = QVBoxLayout()
 layout.setSpacing(20)
 
-titre = QLabel("DrHajar")
+titre = QLabel("Dr Hajar Asri Fennassi")
+titre.setObjectName("PageTitle")
 titre.setAlignment(Qt.AlignCenter)
-titre.setStyleSheet("font-size:28px; font-weight:bold;")
 layout.addWidget(titre)
 
 sous_titre = QLabel("Gestion du Cabinet Médical")
@@ -66,26 +67,32 @@ def ouvrir_certificat_rapport():
 
 
 bouton_nouveau = QPushButton("➕ Ajouter un nouveau patient")
+bouton_nouveau.setObjectName("PrimaryButton")
 bouton_nouveau.clicked.connect(ouvrir_nouveau_patient)
 layout.addWidget(bouton_nouveau)
 
 bouton_ancien = QPushButton("🔍 Voir un ancien patient")
+bouton_ancien.setObjectName("PrimaryButton")
 bouton_ancien.clicked.connect(ouvrir_ancien_patient)
 layout.addWidget(bouton_ancien)
 
 bouton_grossesse = QPushButton("🤰 Grossesses en cours")
+bouton_grossesse.setObjectName("PrimaryButton")
 bouton_grossesse.clicked.connect(ouvrir_grossesses)
 layout.addWidget(bouton_grossesse)
 
 bouton_agenda = QPushButton("📅 Agenda des contrôles")
+bouton_agenda.setObjectName("PrimaryButton")
 bouton_agenda.clicked.connect(ouvrir_agenda)
 layout.addWidget(bouton_agenda)
 
 bouton_certificat_rapport = QPushButton("📄 Certificat / Rapport")
+bouton_certificat_rapport.setObjectName("PrimaryButton")
 bouton_certificat_rapport.clicked.connect(ouvrir_certificat_rapport)
 layout.addWidget(bouton_certificat_rapport)
 
 bouton_quitter = QPushButton("❌ Quitter")
+bouton_quitter.setObjectName("DangerButton")
 bouton_quitter.clicked.connect(app.quit)
 layout.addWidget(bouton_quitter)
 

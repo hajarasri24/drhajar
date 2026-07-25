@@ -1,19 +1,7 @@
 from PySide6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QLabel,
-    QWidget,
+    QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget
 )
-from PySide6.QtGui import (
-    QPainter,
-    QPen,
-    QFont,
-    QColor,
-    QPageSize,
-    QPixmap,
-)
+from PySide6.QtGui import QPainter, QPen, QFont, QColor, QPageSize, QPixmap
 from PySide6.QtCore import Qt, QRectF, QSize
 from PySide6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
 
@@ -58,20 +46,20 @@ class PreviewWidget(QWidget):
             self.dialog._dessiner_contenu(painter, QRectF(page_rect))
 
 
-class OrdonnancePreviewDialog(QDialog):
-    def __init__(self, ordonnance_data, template_pdf_path="documents/ordonnance.pdf", parent=None):
+class DemandeExamenPreviewDialog(QDialog):
+    def __init__(self, data, template_pdf_path="documents/ordonnance.pdf", parent=None):
         super().__init__(parent)
 
-        self.ordonnance_data = ordonnance_data
+        self.data = data
         self.template_pdf_path = template_pdf_path
         self.template_pixmap = self._charger_template_depuis_pdf()
 
-        self.setWindowTitle("Aperçu de l'ordonnance")
+        self.setWindowTitle("Aperçu des examens demandés")
         self.resize(900, 1200)
 
         layout = QVBoxLayout(self)
 
-        self.info = QLabel("Aperçu de l'ordonnance")
+        self.info = QLabel("Aperçu des examens demandés")
         self.info.setAlignment(Qt.AlignCenter)
         self.info.setStyleSheet("font-size:16px; font-weight:bold;")
         layout.addWidget(self.info)
@@ -155,7 +143,7 @@ class OrdonnancePreviewDialog(QDialog):
 
     def _dessiner_contenu(self, painter, page_rect):
         sx = page_rect.width() / 1600.0
-        sy = page_rect.height() / 1980.0
+        sy = page_rect.height() / 2260.0
 
         def x(v):
             return page_rect.x() + v * sx
@@ -163,60 +151,56 @@ class OrdonnancePreviewDialog(QDialog):
         def y(v):
             return page_rect.y() + v * sy
 
-        noir = QColor(20, 20, 20)
-        painter.setPen(QPen(noir))
+        painter.setPen(QPen(QColor(20, 20, 20)))
 
-        nom_patient = self.ordonnance_data.get("nom_patient", "").title()
-        date_du_jour = self.ordonnance_data.get("date", "")
-        poids_brut = self.ordonnance_data.get("poids", "").strip()
-        poids = f"{poids_brut} Kg" if poids_brut else ""
-        lignes = self.ordonnance_data.get("lignes", [])
+        nom_patient = self.data.get("nom_patient", "").title()
+        date_du_jour = self.data.get("date", "")
+        poids = self.data.get("poids", "")
+        lignes = self.data.get("lignes", [])
 
         font_nom = QFont("Verdana")
-        font_nom.setPointSizeF(14)
+        font_nom.setPointSizeF(12)
         font_nom.setBold(True)
         painter.setFont(font_nom)
 
-        painter.drawText(
-            QRectF(x(350), y(547), 520 * sx, 50 * sy),
-            Qt.AlignLeft | Qt.AlignVCenter,
-            nom_patient
-        )
+        painter.drawText(QRectF(x(355), y(550), 520 * sx, 50 * sy),
+                         Qt.AlignLeft | Qt.AlignVCenter, nom_patient)
 
-        font_infos = QFont("Verdana")
-        font_infos.setPointSizeF(14)
-        font_infos.setBold(True)
+        font_infos = QFont("Arial")
+        font_infos.setPointSizeF(10)
         painter.setFont(font_infos)
 
-        painter.drawText(
-            QRectF(x(1050), y(547), 350 * sx, 50 * sy),
-            Qt.AlignLeft | Qt.AlignVCenter,
-            date_du_jour
-        )
+        painter.drawText(QRectF(x(1100), y(550), 250 * sx, 50 * sy),
+                         Qt.AlignLeft | Qt.AlignVCenter, date_du_jour)
 
-        painter.drawText(
-            QRectF(x(400), y(640), 260 * sx, 50 * sy),
-            Qt.AlignLeft | Qt.AlignVCenter,
-            poids
-        )
+        painter.drawText(QRectF(x(450), y(630), 260 * sx, 50 * sy),
+                         Qt.AlignLeft | Qt.AlignVCenter, poids)
 
-        font_lignes = QFont("Verdana")
-        font_lignes.setPointSizeF(14)
+        font_title = QFont("Arial")
+        font_title.setPointSizeF(13)
+        font_title.setBold(True)
+        painter.setFont(font_title)
+
+        painter.drawText(QRectF(x(520), y(720), 560 * sx, 50 * sy),
+                         Qt.AlignCenter | Qt.AlignVCenter, "Faire SVP:")
+
+        painter.drawLine(int(x(520)), int(y(770)), int(x(1080)), int(y(770)))
+
+        font_lignes = QFont("Arial")
+        font_lignes.setPointSizeF(10.5)
         font_lignes.setBold(True)
         painter.setFont(font_lignes)
 
-        top_depart = y(800)
-        interligne = 150 * sy
-        hauteur_bloc = 120 * sy
+        top_depart = y(820)
+        interligne = 120 * sy
+        hauteur_bloc = 90 * sy
 
         for i, ligne in enumerate(lignes, start=1):
             yy = top_depart + (i - 1) * interligne
 
             texte = (
-                f"{i}. {ligne.get('medicament', '').strip()} - "
-                f"    {ligne.get('posologie', '').strip()} - "
-                f"{ligne.get('duree', '').strip()}\n"
-                f"     {ligne.get('remarque', '').strip()}"
+                f"{i}. {ligne.get('examen', '').strip()}\n"
+                f"    {ligne.get('remarque', '').strip()}"
             )
 
             painter.drawText(

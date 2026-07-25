@@ -4,37 +4,48 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QFrame,
 )
 
 import sqlite3
-
 from fiche_patient import FichePatient
 
 
 class FenetreAncienPatient(QWidget):
-
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Ancien patient")
-        self.resize(700, 600)
+        self.resize(800, 640)
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(14)
+
+        carte = QFrame()
+        carte.setObjectName("Card")
+
+        carte_layout = QVBoxLayout(carte)
+        carte_layout.setContentsMargins(22, 22, 22, 22)
+        carte_layout.setSpacing(14)
 
         titre = QLabel("RECHERCHER UN PATIENT")
-        titre.setStyleSheet("font-size:22px;font-weight:bold;")
-        layout.addWidget(titre)
+        titre.setObjectName("PageTitle")
+        carte_layout.addWidget(titre)
+
+        sous_titre = QLabel("Recherche par nom, prénom ou numéro CNI.")
+        sous_titre.setObjectName("MutedLabel")
+        carte_layout.addWidget(sous_titre)
 
         self.recherche = QLineEdit()
-        self.recherche.setPlaceholderText(
-            "Nom, prénom ou CNI..."
-        )
-        layout.addWidget(self.recherche)
+        self.recherche.setPlaceholderText("Nom, prénom ou CNI...")
+        carte_layout.addWidget(self.recherche)
 
         self.liste = QListWidget()
-        layout.addWidget(self.liste)
+        self.liste.setObjectName("PatientList")
+        carte_layout.addWidget(self.liste)
 
-        self.setLayout(layout)
+        layout.addWidget(carte)
 
         self.charger_patients()
 
@@ -42,7 +53,6 @@ class FenetreAncienPatient(QWidget):
         self.liste.itemDoubleClicked.connect(self.ouvrir_patient)
 
     def charger_patients(self):
-
         self.liste.clear()
 
         conn = sqlite3.connect("drhajar.db")
@@ -61,11 +71,10 @@ class FenetreAncienPatient(QWidget):
                 couverture,
                 etat_matrimonial
             FROM patients
-            ORDER BY nom
+            ORDER BY nom, prenom
         """)
 
         self.patients = curseur.fetchall()
-
         conn.close()
 
         for patient in self.patients:
@@ -74,21 +83,14 @@ class FenetreAncienPatient(QWidget):
             )
 
     def filtrer(self):
-
-        texte = self.recherche.text().lower()
+        texte = self.recherche.text().lower().strip()
 
         for i in range(self.liste.count()):
-
             item = self.liste.item(i)
-
-            item.setHidden(
-                texte not in item.text().lower()
-            )
+            item.setHidden(texte not in item.text().lower())
 
     def ouvrir_patient(self, item):
-
         index = self.liste.row(item)
-
         patient = self.patients[index]
 
         self.fiche = FichePatient(patient)

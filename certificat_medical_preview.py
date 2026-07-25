@@ -204,7 +204,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         # (sur la ligne "arrêt de travail de ... jours")
 
         painter.drawText(
-            QRectF(x(1026), y(1000), 390 * sx, 60 * sy),
+            QRectF(x(1170), y(990), 390 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.jours
         )

@@ -9,67 +9,81 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QLineEdit,
+    QFrame,
+    QAbstractItemView,
+    QHeaderView,
+    QMessageBox,
 )
 
-class FenetreGrossessesEnCours(QWidget):
 
+class FenetreGrossessesEnCours(QWidget):
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Grossesses en cours")
-        self.resize(700, 600)
+        self.resize(860, 640)
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(14)
+
+        carte = QFrame()
+        carte.setObjectName("Card")
+
+        carte_layout = QVBoxLayout(carte)
+        carte_layout.setContentsMargins(22, 22, 22, 22)
+        carte_layout.setSpacing(14)
 
         titre = QLabel("🤰 Grossesses en cours")
-        titre.setStyleSheet(
-            "font-size:22px;font-weight:bold;"
-        )
+        titre.setObjectName("PageTitle")
+        carte_layout.addWidget(titre)
 
-        layout.addWidget(titre)
+        sous_titre = QLabel("Rechercher une patiente et ouvrir son dossier de grossesse.")
+        sous_titre.setObjectName("MutedLabel")
+        carte_layout.addWidget(sous_titre)
 
         self.recherche = QLineEdit()
-        self.recherche.setPlaceholderText(
-            "Rechercher par nom ou prénom..."
-        )
-        layout.addWidget(self.recherche)
+        self.recherche.setPlaceholderText("Rechercher par nom ou prénom...")
+        carte_layout.addWidget(self.recherche)
 
         self.table = QTableWidget()
-
         self.table.setColumnCount(3)
-
         self.table.setHorizontalHeaderLabels([
             "Patiente",
             "DPA",
             "Visites"
         ])
-
-        layout.addWidget(self.table)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setAlternatingRowColors(True)
+        self.table.verticalHeader().setVisible(False)
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        carte_layout.addWidget(self.table)
 
         self.btn_ouvrir = QPushButton("Ouvrir le dossier")
+        self.btn_ouvrir.setObjectName("PrimaryButton")
         self.btn_ouvrir.clicked.connect(self.ouvrir_dossier)
-        layout.addWidget(self.btn_ouvrir)
+        carte_layout.addWidget(self.btn_ouvrir)
 
-        self.setLayout(layout)
+        layout.addWidget(carte)
 
         self.charger_grossesses()
-        self.btn_ouvrir.clicked.connect(self.ouvrir_dossier)
 
         self.table.cellDoubleClicked.connect(
             lambda row, column: self.ouvrir_dossier()
         )
-
         self.recherche.textChanged.connect(self.filtrer)
 
     def charger_grossesses(self):
-
         self.table.setRowCount(0)
 
         conn = sqlite3.connect("drhajar.db")
         curseur = conn.cursor()
 
         curseur.execute("""
-
         SELECT
             grossesses.id,
             patients.id,
@@ -78,73 +92,35 @@ class FenetreGrossessesEnCours(QWidget):
             grossesses.ddr,
             grossesses.dpa,
             COUNT(suivi_grossesse.id)
-
         FROM grossesses
-
         JOIN patients
-        ON patients.id = grossesses.patient_id
-
+            ON patients.id = grossesses.patient_id
         LEFT JOIN suivi_grossesse
-        ON suivi_grossesse.grossesse_id = grossesses.id
-
+            ON suivi_grossesse.grossesse_id = grossesses.id
         WHERE grossesses.statut='En cours'
-
         GROUP BY grossesses.id
-
         ORDER BY grossesses.id DESC
-
         """)
 
         lignes = curseur.fetchall()
-
         conn.close()
 
         self.table.setRowCount(len(lignes))
 
         for ligne, grossesse in enumerate(lignes):
+            item_patiente = QTableWidgetItem(f"{grossesse[2]} {grossesse[3]}")
+            item_patiente.setData(1, (grossesse[0], grossesse[1]))
 
-            # Colonne Patiente
-            self.table.setItem(
-                ligne,
-                0,
-                QTableWidgetItem(
-                    f"{grossesse[2]} {grossesse[3]}"
-                )
-            )
+            self.table.setItem(ligne, 0, item_patiente)
+            self.table.setItem(ligne, 1, QTableWidgetItem(grossesse[5] or ""))
+            self.table.setItem(ligne, 2, QTableWidgetItem(str(grossesse[6])))
 
-            # Colonne DPA
-            self.table.setItem(
-                ligne,
-                1,
-                QTableWidgetItem(
-                    grossesse[5] or ""
-                )
-            )
-
-            # Colonne Visites
-            self.table.setItem(
-                ligne,
-                2,
-                QTableWidgetItem(
-                    str(grossesse[6])
-                )
-            )
-
-            # On mémorise les identifiants dans la première colonne
-            self.table.item(ligne, 0).setData(
-                1,
-                (
-                    grossesse[0],   # grossesse_id
-                    grossesse[1]    # patient_id
-                )
-            )
+        self.table.resizeRowsToContents()
 
     def filtrer(self):
-
         texte = self.recherche.text().lower().strip()
 
         for ligne in range(self.table.rowCount()):
-
             item = self.table.item(ligne, 0)
 
             if item is None:
@@ -156,12 +132,16 @@ class FenetreGrossessesEnCours(QWidget):
             )
 
     def ouvrir_dossier(self):
+        ligne = self.table.currentRow()
+        if ligne < 0:
+            QMessageBox.warning(
+                self,
+                "Sélection requise",
+                "Veuillez sélectionner une grossesse dans la liste."
+            )
+            return
 
-        item = self.table.item(
-            self.table.currentRow(),
-            0
-        )
-
+        item = self.table.item(ligne, 0)
         if item is None:
             return
 
@@ -187,8 +167,15 @@ class FenetreGrossessesEnCours(QWidget):
         """, (patient_id,))
 
         patient = curseur.fetchone()
-
         conn.close()
+
+        if patient is None:
+            QMessageBox.warning(
+                self,
+                "Introuvable",
+                "Impossible de charger les informations de la patiente."
+            )
+            return
 
         self.fenetre = FenetreGrossesse(patient)
         self.fenetre.grossesse_id = grossesse_id

@@ -209,6 +209,32 @@ def creer_tables():
         FOREIGN KEY(ordonnance_id) REFERENCES ordonnances(id)
     )
     """)
+    
+        # ==========================================================
+    # TABLE DEMANDES D'EXAMENS
+    # ==========================================================
+
+    curseur.execute("""
+        CREATE TABLE IF NOT EXISTS demandes_examens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type_source TEXT NOT NULL, -- 'consultation' ou 'grossesse'
+            source_id INTEGER NOT NULL, -- consultation_id ou suivi_grossesse_id
+            date_creation TEXT,
+            nom_patient TEXT,
+            poids TEXT
+        )
+    """)
+
+    curseur.execute("""
+        CREATE TABLE IF NOT EXISTS demande_examen_lignes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            demande_id INTEGER NOT NULL,
+            examen TEXT NOT NULL,
+            remarque TEXT,
+            ordre INTEGER DEFAULT 0,
+            FOREIGN KEY(demande_id) REFERENCES demandes_examens(id)
+        )
+    """)
 
     # ==========================================================
     # MISES À JOUR AUTOMATIQUES
