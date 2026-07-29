@@ -69,11 +69,6 @@ class ExamensCliniquesPage(QWidget):
             "👩 Examen gynécologique..."
         )
 
-        self.gestes = QTextEdit()
-        self.gestes.setPlaceholderText(
-            "💉 Gestes médicaux réalisés..."
-        )
-
         layout.addWidget(QLabel("Cardiovasculaire"))
         layout.addWidget(self.cardiovasculaire)
 
@@ -103,8 +98,5 @@ class ExamensCliniquesPage(QWidget):
 
         layout.addWidget(QLabel("Gynécologique"))
         layout.addWidget(self.gyneco)
-
-        layout.addWidget(QLabel("Gestes médicaux"))
-        layout.addWidget(self.gestes)
 
         self.setLayout(layout)

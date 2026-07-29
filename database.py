@@ -67,8 +67,9 @@ def creer_tables():
         locomoteur TEXT,
         uro_genital TEXT,
         gynecologique TEXT,
-        gestes_medicaux TEXT,
 
+        examen_paraclinique TEXT,
+        montant_facturation TEXT,
         examens_complementaires TEXT,
         ordonnance TEXT,
         facture TEXT,
@@ -278,6 +279,33 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
+    # Nouvelles sections de la consultation
+    try:
+        curseur.execute("""
+            ALTER TABLE consultations
+            DROP COLUMN gestes_medicaux
+        """)
+    except sqlite3.OperationalError:
+        # Les anciennes versions de SQLite ne prennent pas en charge DROP COLUMN.
+        # La colonne n'est plus utilisée par l'application dans ce cas.
+        pass
+
+    try:
+        curseur.execute("""
+            ALTER TABLE consultations
+            ADD COLUMN examen_paraclinique TEXT
+        """)
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        curseur.execute("""
+            ALTER TABLE consultations
+            ADD COLUMN montant_facturation TEXT
+        """)
+    except sqlite3.OperationalError:
+        pass
+
     curseur.execute("PRAGMA table_info(consultations)")
 
     print("\nColonnes de la table consultations :")
@@ -305,4 +333,3 @@ if __name__ == "__main__":
     creer_tables()
     print("Base de données mise à jour.")
     
-

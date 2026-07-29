@@ -19,7 +19,9 @@ from ordonnance_preview import OrdonnancePreviewDialog
 from pages.consultation_page import ConsultationPage
 from pages.examen_general import ExamenGeneralPage
 from pages.examens_cliniques import ExamensCliniquesPage
+from pages.examen_paraclinique import ExamenParacliniquePage
 from pages.prescription import PrescriptionPage
+from pages.facturation import FacturationPage
 from demande_examen_preview import DemandeExamenPreviewDialog
 
 
@@ -60,13 +62,17 @@ class FenetreConsultation(QWidget):
         self.btn_consultation = QPushButton("📅 Consultation")
         self.btn_general = QPushButton("🩺 Examen général")
         self.btn_examens = QPushButton("🧪 Examens cliniques")
+        self.btn_paraclinique = QPushButton("🔬 Examen paraclinique")
         self.btn_prescription = QPushButton("💊 Prescription")
+        self.btn_facturation = QPushButton("💳 Facturation")
 
         for btn in [
             self.btn_consultation,
             self.btn_general,
             self.btn_examens,
+            self.btn_paraclinique,
             self.btn_prescription,
+            self.btn_facturation,
         ]:
             btn.setObjectName("SidebarButton")
             menu.addWidget(btn)
@@ -88,7 +94,9 @@ class FenetreConsultation(QWidget):
         self.page_consultation = ConsultationPage()
         self.page_general = ExamenGeneralPage()
         self.page_examens = ExamensCliniquesPage()
+        self.page_paraclinique = ExamenParacliniquePage()
         self.page_prescription = PrescriptionPage()
+        self.page_facturation = FacturationPage()
 
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
@@ -103,7 +111,9 @@ class FenetreConsultation(QWidget):
         self.pages.addWidget(self.page_consultation)
         self.pages.addWidget(self.page_general)
         self.pages.addWidget(self.page_examens)
+        self.pages.addWidget(self.page_paraclinique)
         self.pages.addWidget(self.page_prescription)
+        self.pages.addWidget(self.page_facturation)
 
         zone_defilante = QScrollArea()
         zone_defilante.setWidgetResizable(True)
@@ -130,8 +140,14 @@ class FenetreConsultation(QWidget):
         self.btn_examens.clicked.connect(
             lambda: self.changer_page(2, self.btn_examens)
         )
+        self.btn_paraclinique.clicked.connect(
+            lambda: self.changer_page(3, self.btn_paraclinique)
+        )
         self.btn_prescription.clicked.connect(
-            lambda: self.changer_page(3, self.btn_prescription)
+            lambda: self.changer_page(4, self.btn_prescription)
+        )
+        self.btn_facturation.clicked.connect(
+            lambda: self.changer_page(5, self.btn_facturation)
         )
 
         self.btn_enregistrer.clicked.connect(self.enregistrer_consultation)
@@ -148,7 +164,9 @@ class FenetreConsultation(QWidget):
             self.btn_consultation,
             self.btn_general,
             self.btn_examens,
+            self.btn_paraclinique,
             self.btn_prescription,
+            self.btn_facturation,
         ]:
             btn.setProperty("active", btn is active_button)
             btn.style().unpolish(btn)
@@ -246,14 +264,13 @@ class FenetreConsultation(QWidget):
                 self.page_examens.uro.toPlainText(),
             "gyneco":
                 self.page_examens.gyneco.toPlainText(),
-            "gestes":
-                self.page_examens.gestes.toPlainText(),
+            "examen_paraclinique":
+                self.page_paraclinique.examen_paraclinique.toPlainText(),
             "examens_lignes":
                 self.page_prescription.get_examens_lignes(),
             "ordonnance_lignes":
                 self.page_prescription.get_ordonnance_lignes(),
-            "facture":
-                self.page_prescription.facture.toPlainText(),
+            "montant_facturation": self.page_facturation.montant.text(),
             "mutuelle":
                 self.page_prescription.mutuelle.isChecked()
         }
@@ -291,7 +308,8 @@ class FenetreConsultation(QWidget):
             locomoteur,
             uro_genital,
             gynecologique,
-            gestes_medicaux,
+            examen_paraclinique,
+            montant_facturation,
             examens_complementaires,
             ordonnance,
             facture,
@@ -299,7 +317,7 @@ class FenetreConsultation(QWidget):
         )
         VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
         """, (
             d["patient_id"],
@@ -329,10 +347,11 @@ class FenetreConsultation(QWidget):
             d["locomoteur"],
             d["uro"],
             d["gyneco"],
-            d["gestes"],
+            d["examen_paraclinique"],
+            d["montant_facturation"],
             "",
             "",
-            d["facture"],
+            "",
             int(d["mutuelle"])
         ))
 
@@ -420,10 +439,10 @@ class FenetreConsultation(QWidget):
                 locomoteur=?,
                 uro_genital=?,
                 gynecologique=?,
-                gestes_medicaux=?,
+                examen_paraclinique=?,
+                montant_facturation=?,
                 examens_complementaires=?,
                 ordonnance=?,
-                facture=?,
                 mutuelle_remplie=?
             WHERE id=?
         """, (
@@ -453,10 +472,10 @@ class FenetreConsultation(QWidget):
             d["locomoteur"],
             d["uro"],
             d["gyneco"],
-            d["gestes"],
+            d["examen_paraclinique"],
+            d["montant_facturation"],
             "",
             "",
-            d["facture"],
             int(d["mutuelle"]),
             self.consultation_id
         ))
@@ -510,7 +529,8 @@ class FenetreConsultation(QWidget):
             locomoteur,
             uro_genital,
             gynecologique,
-            gestes_medicaux,
+            examen_paraclinique,
+            montant_facturation,
             examens_complementaires,
             ordonnance,
             facture,
@@ -557,7 +577,7 @@ class FenetreConsultation(QWidget):
         self.page_examens.locomoteur.setPlainText(consultation[25] or "")
         self.page_examens.uro.setPlainText(consultation[26] or "")
         self.page_examens.gyneco.setPlainText(consultation[27] or "")
-        self.page_examens.gestes.setPlainText(consultation[28] or "")
+        self.page_paraclinique.examen_paraclinique.setPlainText(consultation[28] or "")
 
         self.page_prescription.set_examens_lignes(
             self.charger_examens_lignes_consultation(consultation_id)
@@ -565,8 +585,8 @@ class FenetreConsultation(QWidget):
         self.page_prescription.set_ordonnance_lignes(
             self.charger_ordonnance_lignes_consultation(consultation_id)
         )
-        self.page_prescription.facture.setPlainText(consultation[31] or "")
-        self.page_prescription.mutuelle.setChecked(bool(consultation[32]))
+        self.page_facturation.montant.setText(consultation[29] or "")
+        self.page_prescription.mutuelle.setChecked(bool(consultation[33]))
 
     def charger_ordonnance_lignes_consultation(self, consultation_id):
         conn = sqlite3.connect("drhajar.db")

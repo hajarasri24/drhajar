@@ -1,4 +1,4 @@
-01. Examen paraclinique shoul be a primary button, before prescription
+01. Examen paraclinique should be a primary button, before prescription
 02. Geste medicaux should be taken out
 03. Bilan apercu should be as the simple ordonnance
 04. Add another primary button, called Facturation, it should take only one small field contains a number (should be saved to the database)
