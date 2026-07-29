@@ -79,7 +79,7 @@ class PrescriptionPage(QWidget):
         actions_examens.addWidget(self.btn_imprimer_examens)
         layout.addLayout(actions_examens)
 
-        facture_label = QLabel("💰 Facturation / Observations")
+        facture_label = QLabel("Observations")
         layout.addWidget(facture_label)
 
         self.facture = QTextEdit()
