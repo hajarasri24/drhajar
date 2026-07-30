@@ -180,27 +180,22 @@ class CertificatMariagePreviewDialog(QDialog):
         # ================= DATE (sur la ligne "Le :") =================
 
         font_date = QFont("Verdana")
-        font_date.setPointSizeF(14)
+        font_date.setPointSizeF(12)
         font_date.setBold(True)
         painter.setFont(font_date)
         
         painter.drawText(
-            QRectF(x(220), y(697), 520 * sx, 60 * sy),
+            QRectF(x(220), y(685), 520 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.full_name
         )
 
         painter.drawText(
-            QRectF(x(1050), y(697), 520 * sx, 60 * sy),
+            QRectF(x(1050), y(685), 520 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.date_du_jour
         )
         
-        painter.drawText(
-            QRectF(x(500), y(877), 520 * sx, 60 * sy),
-            Qt.AlignLeft | Qt.AlignBottom,
-            self.date_du_jour
-        )
 
         # ================= NOM EN ARABE =================
         # (sur la ligne "بفحص المسمى / المسماة :")
@@ -210,6 +205,12 @@ class CertificatMariagePreviewDialog(QDialog):
         font_arabe.setPointSizeF(16)
         font_arabe.setBold(True)
         painter.setFont(font_arabe)
+
+        painter.drawText(
+            QRectF(x(500), y(1023), 520 * sx, 60 * sy),
+            Qt.AlignLeft | Qt.AlignBottom,
+            self.date_du_jour
+        )
 
         painter.drawText(
             QRectF(x(10), y(1194), 980 * sx, 60 * sy),

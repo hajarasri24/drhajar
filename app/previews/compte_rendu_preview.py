@@ -229,13 +229,13 @@ class CompteRenduPreviewDialog(QDialog):
 
         painter.setPen(QPen(QColor(20, 20, 20)))
 
-        font_nom = QFont("Verdana", max(14, int(35 * sy)))
+        font_nom = QFont("Verdana", max(14, int(30 * sy)))
         font_nom.setBold(True)
         painter.setFont(font_nom)
 
         painter.drawText(QRectF(x(200), y(600), 700 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["nom_patient"].title())
-        painter.drawText(QRectF(x(1150), y(600), 300 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["date"])
-        painter.drawText(QRectF(x(300), y(670), 400 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["poids"] + " KG")
+        painter.drawText(QRectF(x(1050), y(600), 300 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["date"])
+        painter.drawText(QRectF(x(300), y(670), 400 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["poids"] + " Kg")
 
         font_champ = QFont("Verdana", max(14, int(35 * sy)))
         font_champ.setBold(True)

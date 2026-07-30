@@ -181,14 +181,14 @@ class CertificatMedicalPreviewDialog(QDialog):
         painter.setPen(QPen(noir))
 
         font_champs = QFont("Verdana")
-        font_champs.setPointSizeF(16)
+        font_champs.setPointSizeF(14)
         font_champs.setBold(True)
         painter.setFont(font_champs)
 
         # ================= DATE (sur la ligne "Le :") =================
 
         painter.drawText(
-            QRectF(x(1100), y(600), 510 * sx, 60 * sy),
+            QRectF(x(1000), y(590), 510 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.date_du_jour
         )
@@ -197,7 +197,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         # (sur la ligne "Certifie avoir examiné M.(Mme) (Mlle).")
 
         painter.drawText(
-            QRectF(x(850), y(782), 713 * sx, 60 * sy),
+            QRectF(x(850), y(772), 713 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             f"{self.prenom} {self.nom}".title()
         )
@@ -205,7 +205,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         # ================= CNI =================
         # Affiché sur la ligne située juste sous le nom du patient.
         painter.drawText(
-            QRectF(x(850), y(860), 713 * sx, 60 * sy),
+            QRectF(x(850), y(850), 713 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.cni
         )
@@ -214,7 +214,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         # (sur la ligne "arrêt de travail de ... jours")
 
         painter.drawText(
-            QRectF(x(1170), y(990), 390 * sx, 60 * sy),
+            QRectF(x(1170), y(980), 390 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.jours
         )
@@ -225,7 +225,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         if self.date_debut:
 
             painter.drawText(
-                QRectF(x(270), y(1147), 583 * sx, 60 * sy),
+                QRectF(x(270), y(1137), 583 * sx, 60 * sy),
                 Qt.AlignLeft | Qt.AlignBottom,
                 self.date_debut
             )
@@ -233,7 +233,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         if self.date_fin:
 
             painter.drawText(
-                QRectF(x(920), y(1147), 540 * sx, 60 * sy),
+                QRectF(x(920), y(1137), 540 * sx, 60 * sy),
                 Qt.AlignLeft | Qt.AlignBottom,
                 self.date_fin
             )

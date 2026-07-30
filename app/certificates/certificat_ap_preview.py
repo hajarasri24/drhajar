@@ -179,14 +179,14 @@ class CertificatAPPreviewDialog(QDialog):
         painter.setPen(QPen(noir))
 
         font_champs = QFont("Verdana")
-        font_champs.setPointSizeF(16)
+        font_champs.setPointSizeF(14)
         font_champs.setBold(True)
         painter.setFont(font_champs)
 
         # ================= CNI (sur la ligne "CIN :") =================
         if self.cni != "mineur" and self.cni != "Mineur":
             painter.drawText(
-                QRectF(x(1240), y(700), 300 * sx, 60 * sy),
+                QRectF(x(1240), y(690), 300 * sx, 60 * sy),
                 Qt.AlignLeft | Qt.AlignBottom,
                 self.cni
             )
@@ -194,7 +194,7 @@ class CertificatAPPreviewDialog(QDialog):
         # ================= NOM ET PRÉNOM (sur la ligne "dénommé(e)") =================
 
         painter.drawText(
-            QRectF(x(750), y(995), 730 * sx, 60 * sy),
+            QRectF(x(700), y(985), 730 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             f"{self.prenom} {self.nom}".title()
         )
@@ -202,7 +202,7 @@ class CertificatAPPreviewDialog(QDialog):
         # ================= DATE (sur la ligne "Fait à ... le") =================
 
         painter.drawText(
-            QRectF(x(1000), y(1688), 560 * sx, 60 * sy),
+            QRectF(x(1000), y(1678), 560 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.date_du_jour
         )

@@ -164,37 +164,38 @@ class DemandeExamenPreviewDialog(QDialog):
         font_nom.setBold(True)
         painter.setFont(font_nom)
 
-        painter.drawText(QRectF(x(355), y(550), 520 * sx, 50 * sy),
+        painter.drawText(QRectF(x(200), y(630), 600* sx, 50 * sy),
                          Qt.AlignLeft | Qt.AlignVCenter, nom_patient)
 
-        font_infos = QFont("Arial")
-        font_infos.setPointSizeF(10)
+        font_infos = QFont("Verdana")
+        font_infos.setPointSizeF(12)
+        font_infos.setBold(True)
         painter.setFont(font_infos)
 
-        painter.drawText(QRectF(x(1100), y(550), 250 * sx, 50 * sy),
+        painter.drawText(QRectF(x(1050), y(630), 350 * sx, 50 * sy),
                          Qt.AlignLeft | Qt.AlignVCenter, date_du_jour)
 
-        painter.drawText(QRectF(x(450), y(630), 260 * sx, 50 * sy),
-                         Qt.AlignLeft | Qt.AlignVCenter, poids)
+        painter.drawText(QRectF(x(400), y(730), 260 * sx, 50 * sy),
+                         Qt.AlignLeft | Qt.AlignVCenter, f"{poids} Kg")
 
-        font_title = QFont("Arial")
-        font_title.setPointSizeF(13)
+        font_title = QFont("Verdana")
+        font_title.setPointSizeF(14)
         font_title.setBold(True)
         painter.setFont(font_title)
 
-        painter.drawText(QRectF(x(520), y(720), 560 * sx, 50 * sy),
+        painter.drawText(QRectF(x(520), y(850), 560 * sx, 50 * sy),
                          Qt.AlignCenter | Qt.AlignVCenter, "Faire SVP:")
 
-        painter.drawLine(int(x(520)), int(y(770)), int(x(1080)), int(y(770)))
+        painter.drawLine(int(x(520)), int(y(900)), int(x(1080)), int(y(900)))
 
-        font_lignes = QFont("Arial")
-        font_lignes.setPointSizeF(10.5)
+        font_lignes = QFont("Verdana")
+        font_lignes.setPointSizeF(14)
         font_lignes.setBold(True)
         painter.setFont(font_lignes)
 
-        top_depart = y(820)
-        interligne = 120 * sy
-        hauteur_bloc = 90 * sy
+        top_depart = y(1000)
+        interligne = 150 * sy
+        hauteur_bloc = 120 * sy
 
         for i, ligne in enumerate(lignes, start=1):
             yy = top_depart + (i - 1) * interligne

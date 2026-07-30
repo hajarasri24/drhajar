@@ -36,7 +36,7 @@ class PreviewWidget(QWidget):
         painter.setRenderHint(QPainter.TextAntialiasing)
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
-        page_rect = self.rect().adjusted(20, 20, -20, -20)
+        page_rect = self.rect().adjusted(5, 5, -5, -5)
 
         if self.dialog.template_pixmap and not self.dialog.template_pixmap.isNull():
             scaled = self.dialog.template_pixmap.scaled(
@@ -174,18 +174,18 @@ class OrdonnancePreviewDialog(QDialog):
         lignes = self.ordonnance_data.get("lignes", [])
 
         font_nom = QFont("Verdana")
-        font_nom.setPointSizeF(14)
+        font_nom.setPointSizeF(12)
         font_nom.setBold(True)
         painter.setFont(font_nom)
 
         painter.drawText(
-            QRectF(x(350), y(547), 520 * sx, 50 * sy),
+            QRectF(x(200), y(547), 600* sx, 50 * sy),
             Qt.AlignLeft | Qt.AlignVCenter,
             nom_patient
         )
 
         font_infos = QFont("Verdana")
-        font_infos.setPointSizeF(14)
+        font_infos.setPointSizeF(12)
         font_infos.setBold(True)
         painter.setFont(font_infos)
 

@@ -178,14 +178,14 @@ class CertificatPubertePreviewDialog(QDialog):
         painter.setPen(QPen(noir))
 
         font_champs = QFont("Verdana")
-        font_champs.setPointSizeF(14)
+        font_champs.setPointSizeF(12)
         font_champs.setBold(True)
         painter.setFont(font_champs)
 
         # ================= NOM EN FRANÇAIS (sur la ligne "Nom :") =================
 
         painter.drawText(
-            QRectF(x(210), y(695), 520 * sx, 60 * sy),
+            QRectF(x(200), y(690), 520 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.nom_fr
         )
@@ -193,10 +193,15 @@ class CertificatPubertePreviewDialog(QDialog):
         # ================= DATE #1 (sur la ligne "Le :") =================
 
         painter.drawText(
-            QRectF(x(1100), y(695), 520 * sx, 60 * sy),
+            QRectF(x(1000), y(690), 520 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.date_du_jour
         )
+
+        font_text = QFont("Verdana")
+        font_text.setPointSizeF(14)
+        font_text.setBold(True)
+        painter.setFont(font_text)
 
         # ================= DATE #2 =================
         # (sur la ligne "أشهد بأنني قمت يومه ... بطلب منه/منها :")
@@ -211,7 +216,7 @@ class CertificatPubertePreviewDialog(QDialog):
         # (sur la ligne "بفحص المسمى/ المسماة :")
 
         painter.drawText(
-            QRectF(x(700), y(1191), 1063 * sx, 60 * sy),
+            QRectF(x(400), y(1191), 1063 * sx, 60 * sy),
             Qt.AlignLeft | Qt.AlignBottom,
             self.nom_arabe
         )
