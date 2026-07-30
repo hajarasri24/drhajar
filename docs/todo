@@ -4,7 +4,11 @@
 04. Add another primary button, called Facturation, it should take only one small field contains a number (should be saved to the database) ✅
 05. Button of delete field in the ordonnance and bilan should be clear ✅
 06. Markdown for rapport (gras should stay gras, simple should stay simple) ✅
-07. Apercu and imprimer in CR, and date is a little out  
+07. Apercu and imprimer in CR, and date is a little out ✅
 08. CIN should be visible under the name in Certif medical ✅
 09. All the certificats should match hajar's screen
 10. handle the structure of the project, added by hamza ✅
+
+
+01. add facturation for the grossesses case 
+02. all the other certificat/rapports should have the buttons in the top  

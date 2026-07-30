@@ -98,7 +98,7 @@ class GrossessePrescriptionPage(QWidget):
         layout.addWidget(observations_label)
 
         self.observations = QTextEdit()
-        self.observations.setFixedHeight(120)
+        self.observations.setFixedHeight(500)
         layout.addWidget(self.observations)
 
         self.donner_controle = QCheckBox("Donner un contrôle")

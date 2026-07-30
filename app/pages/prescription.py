@@ -75,7 +75,7 @@ class PrescriptionPage(QWidget):
 
         self.observation = QTextEdit()
         self.observation.setPlaceholderText("Observations, remarques...")
-        self.observation.setFixedHeight(90)
+        self.observation.setFixedHeight(500)
         layout.addWidget(self.observation)
 
         self.mutuelle = QCheckBox("Feuille de mutuelle remplie")
