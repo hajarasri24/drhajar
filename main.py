@@ -9,13 +9,13 @@ from PySide6.QtWidgets import (
 )
 
 from PySide6.QtCore import Qt
-from theme import apply_theme
-from database import creer_tables
-from patient import FenetrePatient
-from ancien_patient import FenetreAncienPatient
-from grossesses_en_cours import FenetreGrossessesEnCours
-from agenda import FenetreAgenda
-from certificat_rapport import FenetreCertificatRapport
+from app.core.theme import apply_theme
+from app.core.database import creer_tables
+from app.screens.patient import FenetrePatient
+from app.screens.ancien_patient import FenetreAncienPatient
+from app.screens.grossesses_en_cours import FenetreGrossessesEnCours
+from app.screens.agenda import FenetreAgenda
+from app.screens.certificat_rapport import FenetreCertificatRapport
 
 creer_tables()
 

@@ -1,2 +1,3 @@
-.venv
-drhajar.db
+.venv/
+__pycache__/
+*.py[cod]
