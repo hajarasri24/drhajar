@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QLabel,
     QWidget,
+    QScrollArea
 )
 from PySide6.QtGui import (
     QPainter,
@@ -82,15 +83,15 @@ class CertificatMariagePreviewDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        self.info = QLabel("Aperçu du certificat de mariage")
+        self.info = QLabel("Aperçu du rapport")
         self.info.setAlignment(Qt.AlignCenter)
         self.info.setStyleSheet("font-size:16px; font-weight:bold;")
         layout.addWidget(self.info)
 
-        self.preview_widget = PreviewWidget(self)
-        layout.addWidget(self.preview_widget, 1)
+        # ================= BUTTONS =================
 
         boutons = QHBoxLayout()
+
         self.btn_preview = QPushButton("Aperçu imprimante")
         self.btn_print = QPushButton("Imprimer")
         self.btn_fermer = QPushButton("Fermer")
@@ -99,7 +100,18 @@ class CertificatMariagePreviewDialog(QDialog):
         boutons.addWidget(self.btn_print)
         boutons.addStretch()
         boutons.addWidget(self.btn_fermer)
+
         layout.addLayout(boutons)
+
+        # ================= PREVIEW =================
+
+        self.preview_widget = PreviewWidget(self)
+
+        zone = QScrollArea()
+        zone.setWidgetResizable(True)
+        zone.setWidget(self.preview_widget)
+
+        layout.addWidget(zone, 1)
 
         self.btn_preview.clicked.connect(self.open_preview)
         self.btn_print.clicked.connect(self.print_document)
