@@ -16,17 +16,17 @@ class LigneDemandeExamen(QWidget):
 
         self.examen = QLineEdit()
         self.examen.setPlaceholderText("Examen / test à faire")
-        self.examen.setMinimumHeight(30)
-        self.examen.setMaximumHeight(30)
+        self.examen.setMinimumHeight(40)
+        self.examen.setMaximumHeight(40)
 
         self.remarque = QLineEdit()
         self.remarque.setPlaceholderText("Remarque")
-        self.remarque.setMinimumHeight(30)
-        self.remarque.setMaximumHeight(30)
+        self.remarque.setMinimumHeight(40)
+        self.remarque.setMaximumHeight(40)
 
         self.btn_supprimer = QPushButton("✕")
         self.btn_supprimer.setObjectName("DeleteRowButton")
-        self.btn_supprimer.setFixedSize(32, 30)
+        self.btn_supprimer.setFixedSize(40, 40)
 
         layout.addWidget(self.examen, 3)
         layout.addWidget(self.remarque, 2)

@@ -16,27 +16,27 @@ class LigneMedicament(QWidget):
 
         self.medicament = QLineEdit()
         self.medicament.setPlaceholderText("Médicament")
-        self.medicament.setMinimumHeight(30)
-        self.medicament.setMaximumHeight(30)
+        self.medicament.setMinimumHeight(40)
+        self.medicament.setMaximumHeight(40)
 
         self.posologie = QLineEdit()
         self.posologie.setPlaceholderText("Ex: 2 fois/jour")
-        self.posologie.setMinimumHeight(30)
-        self.posologie.setMaximumHeight(30)
+        self.posologie.setMinimumHeight(40)
+        self.posologie.setMaximumHeight(40)
 
         self.duree = QLineEdit()
         self.duree.setPlaceholderText("Ex: 7 jours")
-        self.duree.setMinimumHeight(30)
-        self.duree.setMaximumHeight(30)
+        self.duree.setMinimumHeight(40)
+        self.duree.setMaximumHeight(40)
         
         self.remarque = QLineEdit()
         self.remarque.setPlaceholderText("Ex: Remarque")
-        self.remarque.setMinimumHeight(30)
-        self.remarque.setMaximumHeight(30)
+        self.remarque.setMinimumHeight(40)
+        self.remarque.setMaximumHeight(40)
 
         self.btn_supprimer = QPushButton("✕")
         self.btn_supprimer.setObjectName("DeleteRowButton")
-        self.btn_supprimer.setFixedSize(32, 30)
+        self.btn_supprimer.setFixedSize(40, 40)
 
         layout.addWidget(self.medicament, 3)
         layout.addWidget(self.posologie, 2)
