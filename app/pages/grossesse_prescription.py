@@ -87,13 +87,6 @@ class GrossessePrescriptionPage(QWidget):
         boutons_bilans.addWidget(self.btn_imprimer_bilans)
         layout.addLayout(boutons_bilans)
 
-        facture_label = QLabel("Facture")
-        layout.addWidget(facture_label)
-
-        self.facture = QTextEdit()
-        self.facture.setFixedHeight(80)
-        layout.addWidget(self.facture)
-
         observations_label = QLabel("Observations")
         layout.addWidget(observations_label)
 

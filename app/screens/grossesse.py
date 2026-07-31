@@ -13,6 +13,8 @@ from PySide6.QtWidgets import (
 
 from ..previews.ordonnance_preview import OrdonnancePreviewDialog
 from ..previews.compte_rendu_preview import CompteRenduPreviewDialog
+from ..pages.facturation import FacturationPage
+
 from PySide6.QtCore import QDate
 
 import sqlite3
@@ -75,12 +77,15 @@ class FenetreGrossesse(QWidget):
         self.btn_examen = QPushButton("🩺 Examen clinique")
         self.btn_echo = QPushButton("👶 Échographie")
         self.btn_prescription = QPushButton("💊 Prescription")
+        self.btn_facturation = QPushButton("💳 Facturation")
+
 
         for btn in [
             self.btn_identite,
             self.btn_examen,
             self.btn_echo,
             self.btn_prescription,
+            self.btn_facturation
         ]:
             btn.setObjectName("SidebarButton")
             menu.addWidget(btn)
@@ -105,6 +110,7 @@ class FenetreGrossesse(QWidget):
         self.page_examen = GrossesseExamenPage()
         self.page_echo = GrossesseEchoPage()
         self.page_prescription = GrossessePrescriptionPage()
+        self.page_facturation = FacturationPage()
 
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
@@ -121,6 +127,7 @@ class FenetreGrossesse(QWidget):
         self.pages.addWidget(self.page_examen)
         self.pages.addWidget(self.page_echo)
         self.pages.addWidget(self.page_prescription)
+        self.pages.addWidget(self.page_facturation)
 
         zone_defilante = QScrollArea()
         zone_defilante.setWidgetResizable(True)
@@ -150,6 +157,10 @@ class FenetreGrossesse(QWidget):
         self.btn_prescription.clicked.connect(
             lambda: self.changer_page(3, self.btn_prescription)
         )
+        
+        self.btn_facturation.clicked.connect(
+            lambda: self.changer_page(4, self.btn_facturation)
+        )
 
         self.changer_page(0, self.btn_identite)
 
@@ -163,6 +174,7 @@ class FenetreGrossesse(QWidget):
             self.btn_examen,
             self.btn_echo,
             self.btn_prescription,
+            self.btn_facturation,
         ]:
             btn.setProperty("active", btn is active_button)
             btn.style().unpolish(btn)
@@ -285,17 +297,16 @@ class FenetreGrossesse(QWidget):
                 self.page_echo.bcf.text(),
             "maf":
                 self.page_echo.maf.text(),
-
             "ordonnance_lignes":
                 self.page_prescription.get_ordonnance_lignes(),
             "bilans_lignes":
                 self.page_prescription.get_bilans_lignes(),
-            "facture":
-                self.page_prescription.facture.toPlainText(),
             "observations":
                 self.page_prescription.observations.toPlainText(),
             "mutuelle":
                 int(self.page_prescription.mutuelle.isChecked()),
+            "facture":
+                self.page_facturation.montant.text()
         }
 
     def charger_grossesse(self, grossesse_id):
@@ -368,6 +379,7 @@ class FenetreGrossesse(QWidget):
         self.charger_suivi(self.liste_suivis[index])
 
     def charger_suivi(self, s):
+        print("this is s: ", s)
         self.page_identite.date_consultation.setDate(
             QDate.fromString(s[2], "yyyy-MM-dd")
         )
@@ -409,7 +421,7 @@ class FenetreGrossesse(QWidget):
         self.page_prescription.set_bilans_lignes(
             self.charger_bilans_lignes_suivi(s[0])
         )
-        self.page_prescription.facture.setPlainText(s[27] or "")
+        self.page_facturation.montant.setText(str(s[27]) or "")
         self.page_prescription.observations.setPlainText(s[28] or "")
         self.page_prescription.mutuelle.setChecked(bool(s[29]))
 
@@ -479,6 +491,7 @@ class FenetreGrossesse(QWidget):
         conn.close()
 
     def sauvegarder_suivi(self, d):
+        print(d)
         conn = sqlite3.connect(DATABASE_PATH)
         curseur = conn.cursor()
 
@@ -510,9 +523,9 @@ class FenetreGrossesse(QWidget):
             maf,
             ordonnance,
             bilans,
-            facture,
             observations,
-            mutuelle_remplie
+            mutuelle_remplie,
+            facture
         ) VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
@@ -545,9 +558,9 @@ class FenetreGrossesse(QWidget):
             d["maf"],
             "",
             "",
-            d["facture"],
             d["observations"],
-            int(d["mutuelle"])
+            int(d["mutuelle"]),
+            d["facture"],
         ))
 
         suivi_id = curseur.lastrowid
