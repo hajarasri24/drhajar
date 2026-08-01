@@ -238,6 +238,28 @@ def creer_tables():
             FOREIGN KEY(demande_id) REFERENCES demandes_examens(id)
         )
     """)
+    
+    # ==========================================================
+    # TABLE DOCUMENTS
+    # ==========================================================
+
+    curseur.execute("""
+        CREATE TABLE IF NOT EXISTS documents (
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            patient_id INTEGER NOT NULL,
+
+            nom_fichier TEXT,
+            chemin_fichier TEXT NOT NULL,
+            type_fichier TEXT,
+            date_ajout TEXT,
+
+            FOREIGN KEY(patient_id)
+            REFERENCES patients(id)
+
+        )
+    """)
 
     # ==========================================================
     # MISES À JOUR AUTOMATIQUES

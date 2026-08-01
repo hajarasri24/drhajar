@@ -8,7 +8,7 @@ ASSETS_DIR = PROJECT_ROOT / "assets"
 TEMPLATES_DIR = ASSETS_DIR / "templates"
 DATA_DIR = PROJECT_ROOT / "data"
 DATABASE_PATH = DATA_DIR / "drhajar.db"
-
+DOCUMENTS_DIR = DATA_DIR / "documents"
 
 def template_path(filename: str) -> str:
     """Return the absolute path of a bundled PDF template."""

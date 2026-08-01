@@ -17,9 +17,7 @@ class ConsultationPage(QWidget):
         layout = QVBoxLayout()
 
         titre = QLabel("CONSULTATION")
-        titre.setStyleSheet(
-            "font-size:18px; font-weight:bold;"
-        )
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         self.patient_label = QLabel("Patient :")

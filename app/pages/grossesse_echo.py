@@ -16,10 +16,7 @@ class GrossesseEchoPage(QWidget):
         layout = QVBoxLayout()
 
         titre = QLabel("ÉCHOGRAPHIE")
-        titre.setStyleSheet(
-            "font-size:18px; font-weight:bold;"
-        )
-
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         formulaire = QFormLayout()

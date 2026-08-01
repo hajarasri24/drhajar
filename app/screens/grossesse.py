@@ -116,6 +116,9 @@ class FenetreGrossesse(QWidget):
         self.page_prescription = GrossessePrescriptionPage()
         self.page_facturation = FacturationPage()
         self.page_documents = DocumentationPage()
+        
+        if self.patient:
+            self.page_documents.definir_patient(self.patient)
 
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
@@ -224,7 +227,10 @@ class FenetreGrossesse(QWidget):
         else:
             self.sauvegarder_grossesse(donnees_grossesse)
 
-        self.sauvegarder_suivi(donnees_suivi)
+        self.sauvegarder_suivi(donnees_suivi)    
+
+        self.page_documents.enregistrer_documents()   # <-- add this line
+
 
         if self.page_prescription.donner_controle.isChecked():
             self.creer_controle_grossesse()

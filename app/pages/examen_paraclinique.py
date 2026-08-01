@@ -8,7 +8,7 @@ class ExamenParacliniquePage(QWidget):
         layout = QVBoxLayout(self)
 
         titre = QLabel("EXAMEN PARACLINIQUE")
-        titre.setStyleSheet("font-size:18px; font-weight:bold;")
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         layout.addWidget(QLabel("Résultats / observations"))

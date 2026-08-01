@@ -16,10 +16,7 @@ class GrossesseExamenPage(QWidget):
         layout = QVBoxLayout()
 
         titre = QLabel("EXAMEN CLINIQUE")
-        titre.setStyleSheet(
-            "font-size:18px; font-weight:bold;"
-        )
-
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         formulaire = QFormLayout()

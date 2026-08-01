@@ -102,6 +102,10 @@ class FenetreConsultation(QWidget):
         self.page_prescription = PrescriptionPage()
         self.page_facturation = FacturationPage()
         self.page_documents = DocumentationPage()
+        
+
+        if self.patient:
+            self.page_documents.definir_patient(self.patient)
 
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
@@ -211,6 +215,15 @@ class FenetreConsultation(QWidget):
             self.sauvegarder_consultation(donnees)
         else:
             self.modifier_consultation(donnees)
+            
+
+        self.page_documents.enregistrer_documents()   
+
+        QMessageBox.information(
+            self,
+            "Succès",
+            "Consultation enregistrée avec succès."
+        )
 
         QMessageBox.information(
             self,

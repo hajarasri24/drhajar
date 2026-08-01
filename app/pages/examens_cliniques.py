@@ -14,9 +14,7 @@ class ExamensCliniquesPage(QWidget):
         layout = QVBoxLayout()
 
         titre = QLabel("EXAMENS CLINIQUES")
-        titre.setStyleSheet(
-            "font-size:18px; font-weight:bold;"
-        )
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         self.cardiovasculaire = QTextEdit()

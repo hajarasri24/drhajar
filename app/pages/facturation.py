@@ -9,7 +9,7 @@ class FacturationPage(QWidget):
         layout = QVBoxLayout(self)
 
         titre = QLabel("FACTURATION")
-        titre.setStyleSheet("font-size:18px; font-weight:bold;")
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         layout.addWidget(QLabel("Montant de la consultation"))

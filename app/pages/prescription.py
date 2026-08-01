@@ -19,7 +19,7 @@ class PrescriptionPage(QWidget):
         layout.setSpacing(8)
 
         titre = QLabel("PRESCRIPTIONS")
-        titre.setStyleSheet("font-size:18px; font-weight:bold;")
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         ordonnance_label = QLabel("💊 Ordonnance structurée")

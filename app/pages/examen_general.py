@@ -16,10 +16,7 @@ class ExamenGeneralPage(QWidget):
         layout = QVBoxLayout()
 
         titre = QLabel("EXAMEN GÉNÉRAL")
-        titre.setStyleSheet(
-            "font-size:18px; font-weight:bold;"
-        )
-
+        titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
         formulaire = QFormLayout()
