@@ -23,6 +23,7 @@ from ..pages.examens_cliniques import ExamensCliniquesPage
 from ..pages.examen_paraclinique import ExamenParacliniquePage
 from ..pages.prescription import PrescriptionPage
 from ..pages.facturation import FacturationPage
+from ..pages.documents import DocumentationPage
 from ..core.paths import DATABASE_PATH
 
 
@@ -66,6 +67,7 @@ class FenetreConsultation(QWidget):
         self.btn_paraclinique = QPushButton("🔬 Examen paraclinique")
         self.btn_prescription = QPushButton("💊 Prescription")
         self.btn_facturation = QPushButton("💳 Facturation")
+        self.btn_documents = QPushButton("📁 Documents")
 
         for btn in [
             self.btn_consultation,
@@ -74,6 +76,7 @@ class FenetreConsultation(QWidget):
             self.btn_paraclinique,
             self.btn_prescription,
             self.btn_facturation,
+            self.btn_documents
         ]:
             btn.setObjectName("SidebarButton")
             menu.addWidget(btn)
@@ -98,6 +101,7 @@ class FenetreConsultation(QWidget):
         self.page_paraclinique = ExamenParacliniquePage()
         self.page_prescription = PrescriptionPage()
         self.page_facturation = FacturationPage()
+        self.page_documents = DocumentationPage()
 
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
@@ -115,6 +119,7 @@ class FenetreConsultation(QWidget):
         self.pages.addWidget(self.page_paraclinique)
         self.pages.addWidget(self.page_prescription)
         self.pages.addWidget(self.page_facturation)
+        self.pages.addWidget(self.page_documents)
 
         zone_defilante = QScrollArea()
         zone_defilante.setWidgetResizable(True)
@@ -150,6 +155,10 @@ class FenetreConsultation(QWidget):
         self.btn_facturation.clicked.connect(
             lambda: self.changer_page(5, self.btn_facturation)
         )
+        
+        self.btn_documents.clicked.connect(
+            lambda: self.changer_page(6, self.btn_documents)
+        )
 
         self.btn_enregistrer.clicked.connect(self.enregistrer_consultation)
         self.btn_controle.clicked.connect(self.donner_controle)
@@ -168,6 +177,7 @@ class FenetreConsultation(QWidget):
             self.btn_paraclinique,
             self.btn_prescription,
             self.btn_facturation,
+            self.btn_documents,
         ]:
             btn.setProperty("active", btn is active_button)
             btn.style().unpolish(btn)

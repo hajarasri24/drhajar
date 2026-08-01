@@ -10,7 +10,11 @@
 10. handle the structure of the project, added by hamza ✅
 
 
-01. add facturation for the grossesses case 
+01. add facturation for the grossesses case ✅
 02. all the other certificat/rapports should have the buttons in the top ✅
 03. all the fields of ordonnance and bilan should be handled ✅
 04. add the text to + in the case of grossesses ✅
+
+
+5. add a button before Enregister called Telecharger Documents
+6. Add another page called (Documents) which contains the images uploaded (radio, resultats...)

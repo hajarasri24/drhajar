@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from ..previews.ordonnance_preview import OrdonnancePreviewDialog
 from ..previews.compte_rendu_preview import CompteRenduPreviewDialog
 from ..pages.facturation import FacturationPage
+from ..pages.documents import DocumentationPage
 
 from PySide6.QtCore import QDate
 
@@ -78,6 +79,8 @@ class FenetreGrossesse(QWidget):
         self.btn_echo = QPushButton("👶 Échographie")
         self.btn_prescription = QPushButton("💊 Prescription")
         self.btn_facturation = QPushButton("💳 Facturation")
+        self.btn_documents = QPushButton("📁 Documents")
+
 
 
         for btn in [
@@ -85,7 +88,8 @@ class FenetreGrossesse(QWidget):
             self.btn_examen,
             self.btn_echo,
             self.btn_prescription,
-            self.btn_facturation
+            self.btn_facturation,
+            self.btn_documents,
         ]:
             btn.setObjectName("SidebarButton")
             menu.addWidget(btn)
@@ -111,6 +115,7 @@ class FenetreGrossesse(QWidget):
         self.page_echo = GrossesseEchoPage()
         self.page_prescription = GrossessePrescriptionPage()
         self.page_facturation = FacturationPage()
+        self.page_documents = DocumentationPage()
 
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
@@ -128,6 +133,7 @@ class FenetreGrossesse(QWidget):
         self.pages.addWidget(self.page_echo)
         self.pages.addWidget(self.page_prescription)
         self.pages.addWidget(self.page_facturation)
+        self.pages.addWidget(self.page_documents)
 
         zone_defilante = QScrollArea()
         zone_defilante.setWidgetResizable(True)
@@ -161,6 +167,10 @@ class FenetreGrossesse(QWidget):
         self.btn_facturation.clicked.connect(
             lambda: self.changer_page(4, self.btn_facturation)
         )
+        
+        self.btn_documents.clicked.connect(
+            lambda: self.changer_page(5, self.btn_documents)
+        )
 
         self.changer_page(0, self.btn_identite)
 
@@ -175,6 +185,7 @@ class FenetreGrossesse(QWidget):
             self.btn_echo,
             self.btn_prescription,
             self.btn_facturation,
+            self.btn_documents,
         ]:
             btn.setProperty("active", btn is active_button)
             btn.style().unpolish(btn)
