@@ -235,7 +235,7 @@ class CertificatPubertePreviewDialog(QDialog):
 
         # ================= CNI =================
         # (sur la ligne "الحامل للبطاقة الوطنية رقم :")
-        if self.cni != "Mineur" and self.cni != "mineur" :
+        if self.cni != "None" and self.cni != "none" :
             painter.drawText(
                 QRectF(x(500), y(1358), 1028 * sx, 60 * sy),
                 Qt.AlignLeft | Qt.AlignBottom,

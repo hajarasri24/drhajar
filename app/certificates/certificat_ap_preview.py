@@ -196,7 +196,7 @@ class CertificatAPPreviewDialog(QDialog):
         painter.setFont(font_champs)
 
         # ================= CNI (sur la ligne "CIN :") =================
-        if self.cni != "mineur" and self.cni != "Mineur":
+        if self.cni != "None" and self.cni != "none":
             painter.drawText(
                 QRectF(x(1240), y(690), 300 * sx, 60 * sy),
                 Qt.AlignLeft | Qt.AlignBottom,

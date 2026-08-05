@@ -238,7 +238,7 @@ class CertificatMariagePreviewDialog(QDialog):
         font_cni.setBold(True)
         painter.setFont(font_cni)
 
-        if self.cni != "Mineur" and self.cni != "mineur" :
+        if self.cni != "none" and self.cni != "None" :
             painter.drawText(
                 QRectF(x(500), y(1355), 998 * sx, 60 * sy),
                 Qt.AlignLeft | Qt.AlignBottom,
