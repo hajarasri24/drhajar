@@ -167,6 +167,7 @@ class DemandeExamenPreviewDialog(QDialog):
         nom_patient = self.data.get("nom_patient", "").title()
         date_du_jour = self.data.get("date", "")
         poids = self.data.get("poids", "")
+        texte_controle = self.data.get("texte_controle", "")
         lignes = self.data.get("lignes", [])
 
         font_nom = QFont("Verdana")
@@ -219,4 +220,12 @@ class DemandeExamenPreviewDialog(QDialog):
                 QRectF(x(145), yy, 1300 * sx, hauteur_bloc),
                 Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
                 texte
+            )
+
+        if texte_controle:
+            # Position du texte de contrôle : à ajuster librement si nécessaire.
+            painter.drawText(
+                QRectF(x(145), y(1850), 1300 * sx, 50 * sy),
+                Qt.AlignLeft | Qt.AlignVCenter,
+                texte_controle
             )

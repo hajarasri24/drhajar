@@ -179,7 +179,7 @@ class FenetrePatient(QWidget):
             champs_manquants.append("Prénom")
 
         if not self.cni.text().strip():
-            champs_manquants.append("CNI")
+            champs_manquants.append("CNI".upper())
 
         if (
             self.couverture.currentText() == "Autre"
@@ -215,10 +215,10 @@ class FenetrePatient(QWidget):
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            self.nom.text(),
-            self.prenom.text(),
+            self.nom.text().title(),
+            self.prenom.text().title(),
             self.sexe.currentText(),
-            self.cni.text(),
+            self.cni.text().upper(),
             self.telephone.text(),
             self.adresse.text(),
             self.naissance.date().toString("yyyy-MM-dd"),
@@ -238,10 +238,10 @@ class FenetrePatient(QWidget):
 
         patient = (
             patient_id,
-            self.nom.text(),
-            self.prenom.text(),
+            self.nom.text().title(),
+            self.prenom.text().title(),
             self.sexe.currentText(),
-            self.cni.text(),
+            self.cni.text().upper(),
             self.telephone.text(),
             self.adresse.text(),
             self.naissance.date().toString("yyyy-MM-dd"),

@@ -213,6 +213,7 @@ def creer_tables():
         posologie TEXT,
         duree TEXT,
         remarque TEXT,
+        visible INTEGER NOT NULL DEFAULT 1,
         ordre INTEGER DEFAULT 0,
         FOREIGN KEY(ordonnance_id) REFERENCES ordonnances(id)
     )
@@ -239,6 +240,7 @@ def creer_tables():
             demande_id INTEGER NOT NULL,
             examen TEXT NOT NULL,
             remarque TEXT,
+            visible INTEGER NOT NULL DEFAULT 1,
             ordre INTEGER DEFAULT 0,
             FOREIGN KEY(demande_id) REFERENCES demandes_examens(id)
         )
@@ -343,6 +345,16 @@ def creer_tables():
         """)
     except sqlite3.OperationalError:
         pass
+
+    # Visibilité des lignes dans les aperçus/impressions d'ordonnance et de bilan.
+    # Les lignes existantes restent visibles par défaut.
+    for table in ("ordonnance_lignes", "demande_examen_lignes"):
+        try:
+            curseur.execute(
+                f"ALTER TABLE {table} ADD COLUMN visible INTEGER NOT NULL DEFAULT 1"
+            )
+        except sqlite3.OperationalError:
+            pass
 
     curseur.execute("PRAGMA table_info(consultations)")
 

@@ -184,6 +184,7 @@ class OrdonnancePreviewDialog(QDialog):
         date_du_jour = self.ordonnance_data.get("date", "")
         poids_brut = self.ordonnance_data.get("poids", "").strip()
         poids = f"{poids_brut} Kg" if poids_brut else ""
+        texte_controle = self.ordonnance_data.get("texte_controle", "")
         lignes = self.ordonnance_data.get("lignes", [])
 
         font_nom = QFont("Verdana")
@@ -237,4 +238,12 @@ class OrdonnancePreviewDialog(QDialog):
                 QRectF(x(145), yy, 1300 * sx, hauteur_bloc),
                 Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
                 texte
+            )
+
+        if texte_controle:
+            # Position du texte de contrôle : à ajuster librement si nécessaire.
+            painter.drawText(
+                QRectF(x(145), y(1650), 1300 * sx, 50 * sy),
+                Qt.AlignLeft | Qt.AlignVCenter,
+                texte_controle
             )

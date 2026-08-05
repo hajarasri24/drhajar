@@ -72,7 +72,7 @@ class FenetreAncienPatient(QWidget):
                 couverture,
                 etat_matrimonial
             FROM patients
-            ORDER BY nom, prenom
+            ORDER BY id
         """)
 
         self.patients = curseur.fetchall()

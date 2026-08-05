@@ -5,11 +5,16 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QListWidget,
+    QListWidgetItem,
     QCalendarWidget,
     QFrame,
+    QPushButton,
+    QHBoxLayout,
+    QDialog,
+    QMessageBox,
 )
 
-from PySide6.QtCore import QDate, Qt
+from PySide6.QtCore import QDate, Qt, QSize
 
 from PySide6.QtGui import (
     QTextCharFormat,
@@ -112,6 +117,7 @@ class FenetreAgenda(QWidget):
 
         curseur.execute("""
             SELECT
+                rendez_vous.id,
                 patients.nom,
                 patients.prenom,
                 rendez_vous.type
@@ -130,15 +136,45 @@ class FenetreAgenda(QWidget):
         if len(rendez_vous) == 0:
             self.liste.addItem("Aucun contrôle prévu.")
         else:
-            for patient in rendez_vous:
-                if patient[2] == "Grossesse":
+            for rendez_vous_patient in rendez_vous:
+                if rendez_vous_patient[3] == "Grossesse":
                     icone = "🤰"
                 else:
                     icone = "🩺"
 
-                self.liste.addItem(
-                    f"{icone} {patient[1]} {patient[0]}  •  {patient[2]}"
+                item = QListWidgetItem()
+                ligne = QFrame()
+                ligne.setMinimumHeight(52)
+                ligne_layout = QHBoxLayout(ligne)
+                ligne_layout.setContentsMargins(8, 5, 8, 5)
+                ligne_layout.setSpacing(8)
+
+                patient = QLabel(
+                    f"{icone} {rendez_vous_patient[2]} {rendez_vous_patient[1]}"
+                    f"  •  {rendez_vous_patient[3]}"
                 )
+                ligne_layout.addWidget(patient)
+                ligne_layout.addStretch()
+
+                btn_modifier = QPushButton("Modifier")
+                btn_modifier.setObjectName("SecondaryButton")
+                btn_modifier.setMinimumSize(100, 36)
+                btn_modifier.clicked.connect(
+                    lambda checked=False, rdv_id=rendez_vous_patient[0]: self.modifier_rendez_vous(rdv_id)
+                )
+                ligne_layout.addWidget(btn_modifier)
+
+                btn_supprimer = QPushButton("Supprimer")
+                btn_supprimer.setObjectName("DangerButton")
+                btn_supprimer.setMinimumSize(100, 36)
+                btn_supprimer.clicked.connect(
+                    lambda checked=False, rdv_id=rendez_vous_patient[0]: self.supprimer_rendez_vous(rdv_id)
+                )
+                ligne_layout.addWidget(btn_supprimer)
+
+                item.setSizeHint(QSize(0, 58))
+                self.liste.addItem(item)
+                self.liste.setItemWidget(item, ligne)
 
         self.colorer_calendrier()
 
@@ -181,3 +217,75 @@ class FenetreAgenda(QWidget):
                 format_date.setBackground(QColor("#7B2432"))
 
             self.calendrier.setDateTextFormat(date, format_date)
+
+    def modifier_rendez_vous(self, rendez_vous_id):
+        """Choisit une nouvelle date et la persiste pour ce contrôle précis."""
+        dialogue = QDialog(self)
+        dialogue.setWindowTitle("Modifier la date du contrôle")
+        layout = QVBoxLayout(dialogue)
+        layout.addWidget(QLabel("Choisissez la nouvelle date du contrôle :"))
+        calendrier = QCalendarWidget()
+        calendrier.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+        layout.addWidget(calendrier)
+
+        boutons = QHBoxLayout()
+        annuler = QPushButton("Annuler")
+        valider = QPushButton("Enregistrer")
+        valider.setObjectName("PrimaryButton")
+        boutons.addWidget(annuler)
+        boutons.addWidget(valider)
+        layout.addLayout(boutons)
+        annuler.clicked.connect(dialogue.reject)
+        valider.clicked.connect(dialogue.accept)
+
+        if dialogue.exec() != QDialog.Accepted:
+            return
+
+        nouvelle_date = calendrier.selectedDate().toString("yyyy-MM-dd")
+        conn = sqlite3.connect(DATABASE_PATH)
+        curseur = conn.cursor()
+        curseur.execute("SELECT patient_id, date_rdv FROM rendez_vous WHERE id = ?", (rendez_vous_id,))
+        rendez_vous = curseur.fetchone()
+        if not rendez_vous:
+            conn.close()
+            return
+
+        if rendez_vous[1] == nouvelle_date:
+            conn.close()
+            return
+
+        curseur.execute("""
+            SELECT id FROM rendez_vous
+            WHERE patient_id = ? AND date_rdv = ? AND id != ?
+            LIMIT 1
+        """, (rendez_vous[0], nouvelle_date, rendez_vous_id))
+        if curseur.fetchone():
+            conn.close()
+            QMessageBox.warning(
+                self, "Contrôle déjà programmé",
+                "Ce patient a déjà un contrôle programmé à cette date."
+            )
+            return
+
+        curseur.execute("UPDATE rendez_vous SET date_rdv = ? WHERE id = ?", (nouvelle_date, rendez_vous_id))
+        conn.commit()
+        conn.close()
+        self.charger_rendez_vous()
+
+    def supprimer_rendez_vous(self, rendez_vous_id):
+        reponse = QMessageBox.question(
+            self,
+            "Supprimer le contrôle",
+            "Voulez-vous vraiment supprimer ce contrôle ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if reponse != QMessageBox.Yes:
+            return
+
+        conn = sqlite3.connect(DATABASE_PATH)
+        curseur = conn.cursor()
+        curseur.execute("DELETE FROM rendez_vous WHERE id = ?", (rendez_vous_id,))
+        conn.commit()
+        conn.close()
+        self.charger_rendez_vous()

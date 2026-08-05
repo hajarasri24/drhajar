@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, Signal
 
 from PySide6.QtGui import (
     QTextCharFormat,
@@ -20,6 +20,7 @@ from ..core.paths import DATABASE_PATH
 
 
 class ChoisirDate(QWidget):
+    controle_enregistre = Signal(QDate)
 
     def __init__(self, patient_id, type_rdv):
         super().__init__()
@@ -142,29 +143,80 @@ class ChoisirDate(QWidget):
         conn = sqlite3.connect(DATABASE_PATH)
         curseur = conn.cursor()
 
+        # Un patient ne peut avoir qu'un seul contrôle à une même date.
         curseur.execute("""
-            INSERT INTO rendez_vous
-            (
-                patient_id,
-                date_rdv,
-                type
+            SELECT id
+            FROM rendez_vous
+            WHERE patient_id = ? AND date_rdv = ?
+            LIMIT 1
+        """, (self.patient_id, date))
+        if curseur.fetchone():
+            conn.close()
+            QMessageBox.warning(
+                self,
+                "Contrôle déjà programmé",
+                "Ce patient a déjà un contrôle programmé à cette date."
             )
-            VALUES (?, ?, ?)
-        """, (
+            return
 
-            self.patient_id,
-            date,
-            self.type_rdv
+        # Si le patient a déjà un contrôle, la confirmation permet de
+        # déplacer ce rendez-vous au lieu d'en créer un second.
+        curseur.execute("""
+            SELECT id, date_rdv
+            FROM rendez_vous
+            WHERE patient_id = ?
+            ORDER BY date_rdv, id
+            LIMIT 1
+        """, (self.patient_id,))
+        rendez_vous_existant = curseur.fetchone()
 
-        ))
+        if rendez_vous_existant:
+            ancienne_date = QDate.fromString(rendez_vous_existant[1], "yyyy-MM-dd")
+            reponse = QMessageBox.question(
+                self,
+                "Contrôle existant",
+                "Ce patient a déjà un contrôle le "
+                f"{ancienne_date.toString('dd/MM/yyyy')}.\n\n"
+                "Voulez-vous modifier la date de ce contrôle ?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if reponse != QMessageBox.Yes:
+                conn.close()
+                return
+
+            curseur.execute(
+                "UPDATE rendez_vous SET date_rdv = ?, type = ? WHERE id = ?",
+                (date, self.type_rdv, rendez_vous_existant[0])
+            )
+            message = "Date du contrôle modifiée."
+        else:
+            curseur.execute("""
+                INSERT INTO rendez_vous
+                (
+                    patient_id,
+                    date_rdv,
+                    type
+                )
+                VALUES (?, ?, ?)
+            """, (
+
+                self.patient_id,
+                date,
+                self.type_rdv
+
+            ))
+            message = "Contrôle enregistré."
 
         conn.commit()
         conn.close()
 
+        self.controle_enregistre.emit(self.calendrier.selectedDate())
+
         QMessageBox.information(
             self,
             "Succès",
-            "Contrôle enregistré."
+            message
         )
 
         self.close()

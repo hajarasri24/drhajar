@@ -109,11 +109,11 @@ class PrescriptionPage(QWidget):
         ligne.setParent(None)
         ligne.deleteLater()
 
-    def get_ordonnance_lignes(self):
+    def get_ordonnance_lignes(self, visible_only=False):
         lignes = []
         for ligne in self.lignes_medicaments:
             data = ligne.get_data()
-            if data["medicament"]:
+            if data["medicament"] and (not visible_only or data["visible"]):
                 lignes.append(data)
         return lignes
 
@@ -152,11 +152,11 @@ class PrescriptionPage(QWidget):
         ligne.setParent(None)
         ligne.deleteLater()
 
-    def get_examens_lignes(self):
+    def get_examens_lignes(self, visible_only=False):
         lignes = []
         for ligne in self.lignes_examens:
             data = ligne.get_data()
-            if data["examen"]:
+            if data["examen"] and (not visible_only or data["visible"]):
                 lignes.append(data)
         return lignes
 

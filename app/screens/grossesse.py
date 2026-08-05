@@ -123,7 +123,7 @@ class FenetreGrossesse(QWidget):
         self.page_prescription.btn_apercu.clicked.connect(self.apercu_ordonnance)
         self.page_prescription.btn_imprimer.clicked.connect(self.imprimer_ordonnance)
         
-        self.btn_compte_rendu.clicked.connect(self.apercu_compte_rendu)
+        self.btn_compte_rendu.clicked.connect(self.choisir_page_compte_rendu)
 
         self.page_prescription.btn_apercu_bilans.clicked.connect(self.apercu_bilans)
         self.page_prescription.btn_imprimer_bilans.clicked.connect(self.imprimer_bilans)
@@ -463,7 +463,7 @@ class FenetreGrossesse(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            SELECT ol.medicament, ol.posologie, ol.duree, ol.remarque
+            SELECT ol.medicament, ol.posologie, ol.duree, ol.remarque, ol.visible
             FROM ordonnances o
             JOIN ordonnance_lignes ol
                 ON ol.ordonnance_id = o.id
@@ -476,7 +476,8 @@ class FenetreGrossesse(QWidget):
                 "medicament": row[0] or "",
                 "posologie": row[1] or "",
                 "duree": row[2] or "",
-                "remarque": row[3] or ""
+                "remarque": row[3] or "",
+                "visible": bool(row[4])
             }
             for row in curseur.fetchall()
         ]
@@ -681,8 +682,15 @@ class FenetreGrossesse(QWidget):
             "nom_patient": nom_patient,
             "date": date_du_jour,
             "poids": poids,
-            "lignes": self.page_prescription.get_ordonnance_lignes()
+            "texte_controle": self.texte_controle(),
+            "lignes": self.page_prescription.get_ordonnance_lignes(visible_only=True)
         }
+
+    def texte_controle(self):
+        if not self.page_prescription.donner_controle.isChecked():
+            return ""
+        date = self.page_prescription.date_controle.date()
+        return f"Le contrôle à {date.toString('dd/MM/yyyy')}"
 
     def apercu_ordonnance(self):
         donnees = self.construire_donnees_ordonnance()
@@ -735,14 +743,15 @@ class FenetreGrossesse(QWidget):
         for i, ligne in enumerate(lignes):
             remarque = ligne.get("remarque", "")
             curseur.execute("""
-                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, remarque, ordre)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, remarque, visible, ordre)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 ordonnance_id,
                 ligne["medicament"],
                 ligne["posologie"],
                 ligne["duree"],
                 remarque,
+                int(ligne["visible"]),
                 i
             ))
 
@@ -771,12 +780,13 @@ class FenetreGrossesse(QWidget):
 
         for i, ligne in enumerate(lignes):
             curseur.execute("""
-                INSERT INTO demande_examen_lignes (demande_id, examen, remarque, ordre)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO demande_examen_lignes (demande_id, examen, remarque, visible, ordre)
+                VALUES (?, ?, ?, ?, ?)
             """, (
                 demande_id,
                 ligne["examen"],
                 ligne["remarque"],
+                int(ligne["visible"]),
                 i
             ))
 
@@ -788,7 +798,7 @@ class FenetreGrossesse(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            SELECT del.examen, del.remarque
+            SELECT del.examen, del.remarque, del.visible
             FROM demandes_examens de
             JOIN demande_examen_lignes del
                 ON del.demande_id = de.id
@@ -799,7 +809,8 @@ class FenetreGrossesse(QWidget):
         lignes = [
             {
                 "examen": row[0] or "",
-                "remarque": row[1] or ""
+                "remarque": row[1] or "",
+                "visible": bool(row[2])
             }
             for row in curseur.fetchall()
         ]
@@ -816,7 +827,8 @@ class FenetreGrossesse(QWidget):
             "nom_patient": nom_patient,
             "date": date_du_jour,
             "poids": poids,
-            "lignes": self.page_prescription.get_bilans_lignes()
+            "texte_controle": self.texte_controle(),
+            "lignes": self.page_prescription.get_bilans_lignes(visible_only=True)
         }
 
     def apercu_bilans(self):
@@ -897,12 +909,26 @@ class FenetreGrossesse(QWidget):
             "date_presumee_acc": self.page_echo.date_presumee_acc.date().toString("dd/MM/yyyy"),
         }
 
-    def apercu_compte_rendu(self):
+    def choisir_page_compte_rendu(self):
+        choix = QMessageBox(self)
+        choix.setWindowTitle("Générer compte rendu")
+        choix.setText("Quelle page du compte rendu souhaitez-vous générer ?")
+        bouton_page1 = choix.addButton("Première page", QMessageBox.ActionRole)
+        bouton_page2 = choix.addButton("Deuxième page", QMessageBox.ActionRole)
+        choix.addButton(QMessageBox.Cancel)
+        choix.exec()
+
+        if choix.clickedButton() == bouton_page1:
+            self.apercu_compte_rendu(1)
+        elif choix.clickedButton() == bouton_page2:
+            self.apercu_compte_rendu(2)
+
+    def apercu_compte_rendu(self, numero_page=1):
         donnees = self.construire_donnees_compte_rendu()
-        dlg = CompteRenduPreviewDialog(donnees, parent=self)
+        dlg = CompteRenduPreviewDialog(donnees, numero_page=numero_page, parent=self)
         dlg.exec()
 
-    def imprimer_compte_rendu(self):
+    def imprimer_compte_rendu(self, numero_page=1):
         donnees = self.construire_donnees_compte_rendu()
-        dlg = CompteRenduPreviewDialog(donnees, parent=self)
+        dlg = CompteRenduPreviewDialog(donnees, numero_page=numero_page, parent=self)
         dlg.print_document()

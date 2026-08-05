@@ -33,6 +33,7 @@ class FenetreConsultation(QWidget):
 
         self.patient = patient
         self.consultation_id = None
+        self.date_controle = None
 
         self.setWindowTitle("Consultation")
         self.resize(1400, 850)
@@ -417,14 +418,15 @@ class FenetreConsultation(QWidget):
         for i, ligne in enumerate(lignes):
             remarque = ligne.get("remarque", "")
             curseur.execute("""
-                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, remarque, ordre)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, remarque, visible, ordre)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 ordonnance_id,
                 ligne["medicament"],
                 ligne["posologie"],
                 ligne["duree"],
                 remarque,
+                int(ligne["visible"]),
                 i
             ))
 
@@ -621,7 +623,7 @@ class FenetreConsultation(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            SELECT ol.medicament, ol.posologie, ol.duree, ol.remarque
+            SELECT ol.medicament, ol.posologie, ol.duree, ol.remarque, ol.visible
             FROM ordonnances o
             JOIN ordonnance_lignes ol
                 ON ol.ordonnance_id = o.id
@@ -634,7 +636,8 @@ class FenetreConsultation(QWidget):
                 "medicament": row[0] or "",
                 "posologie": row[1] or "",
                 "duree": row[2] or "",
-                "remarque": row[3] or ""
+                "remarque": row[3] or "",
+                "visible": bool(row[4])
             }
             for row in curseur.fetchall()
         ]
@@ -668,7 +671,16 @@ class FenetreConsultation(QWidget):
             self.patient[0],
             "Consultation"
         )
+        self.controle.controle_enregistre.connect(self.definir_date_controle)
         self.controle.show()
+
+    def definir_date_controle(self, date):
+        self.date_controle = date
+
+    def texte_controle(self):
+        if not self.date_controle:
+            return ""
+        return f"Le contrôle à {self.date_controle.toString('dd/MM/yyyy')}"
 
     def build_ordonnance_data(self):
         nom_patient = f"{self.patient[1]} {self.patient[2]}".strip() if self.patient else ""
@@ -679,7 +691,8 @@ class FenetreConsultation(QWidget):
             "nom_patient": nom_patient,
             "date": date_du_jour,
             "poids": poids,
-            "lignes": self.page_prescription.get_ordonnance_lignes()
+            "texte_controle": self.texte_controle(),
+            "lignes": self.page_prescription.get_ordonnance_lignes(visible_only=True)
         }
 
     def apercu_ordonnance(self):
@@ -758,12 +771,13 @@ class FenetreConsultation(QWidget):
 
         for i, ligne in enumerate(lignes):
             curseur.execute("""
-                INSERT INTO demande_examen_lignes (demande_id, examen, remarque, ordre)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO demande_examen_lignes (demande_id, examen, remarque, visible, ordre)
+                VALUES (?, ?, ?, ?, ?)
             """, (
                 demande_id,
                 ligne["examen"],
                 ligne["remarque"],
+                int(ligne["visible"]),
                 i
             ))
 
@@ -775,7 +789,7 @@ class FenetreConsultation(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            SELECT del.examen, del.remarque
+            SELECT del.examen, del.remarque, del.visible
             FROM demandes_examens de
             JOIN demande_examen_lignes del
                 ON del.demande_id = de.id
@@ -786,7 +800,8 @@ class FenetreConsultation(QWidget):
         lignes = [
             {
                 "examen": row[0] or "",
-                "remarque": row[1] or ""
+                "remarque": row[1] or "",
+                "visible": bool(row[2])
             }
             for row in curseur.fetchall()
         ]
@@ -829,7 +844,8 @@ class FenetreConsultation(QWidget):
             "nom_patient": nom_patient,
             "date": date_du_jour,
             "poids": poids,
-            "lignes": self.page_prescription.get_examens_lignes()
+            "texte_controle": self.texte_controle(),
+            "lignes": self.page_prescription.get_examens_lignes(visible_only=True)
         }
 
     def apercu_examens(self):

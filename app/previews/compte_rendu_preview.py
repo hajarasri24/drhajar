@@ -74,25 +74,28 @@ class ImagePagePreviewWidget(QWidget):
 
 
 class CompteRenduPreviewDialog(QDialog):
-    def __init__(self, donnees, chemin_page1=None, chemin_page2=None, parent=None):
+    def __init__(self, donnees, numero_page=1, chemin_page1=None, chemin_page2=None, parent=None):
         super().__init__(parent)
 
+        if numero_page not in (1, 2):
+            raise ValueError("Le numéro de page doit être 1 ou 2.")
+
         self.donnees = donnees
+        self.numero_page = numero_page
         self.chemin_page1 = chemin_page1 or template_path("1.pdf")
         self.chemin_page2 = chemin_page2 or template_path("2.pdf")
 
-        self.pixmap_page1 = self._charger_template_depuis_pdf(self.chemin_page1)
-        self.pixmap_page2 = self._charger_template_depuis_pdf(self.chemin_page2)
-        
-        self.page_image1 = self._creer_image_finale(self.pixmap_page1, self._dessiner_page1)
-        self.page_image2 = self._creer_image_finale(self.pixmap_page2, self._dessiner_page2)
+        chemin_template = self.chemin_page1 if numero_page == 1 else self.chemin_page2
+        fonction_dessin = self._dessiner_page1 if numero_page == 1 else self._dessiner_page2
+        pixmap_template = self._charger_template_depuis_pdf(chemin_template)
+        self.page_image = self._creer_image_finale(pixmap_template, fonction_dessin)
 
-        self.setWindowTitle("Aperçu du compte rendu")
+        self.setWindowTitle(f"Aperçu du compte rendu — Page {numero_page}")
         self.resize(950, 1300)
 
         layout = QVBoxLayout(self)
 
-        self.info = QLabel("Aperçu du compte rendu")
+        self.info = QLabel(f"Aperçu du compte rendu — Page {numero_page}")
         self.info.setAlignment(Qt.AlignCenter)
         self.info.setStyleSheet("font-size:16px; font-weight:bold;")
         layout.addWidget(self.info)
@@ -113,11 +116,8 @@ class CompteRenduPreviewDialog(QDialog):
         conteneur = QWidget()
         conteneur_layout = QVBoxLayout(conteneur)
 
-        self.widget_page1 = ImagePagePreviewWidget(self.page_image1)
-        self.widget_page2 = ImagePagePreviewWidget(self.page_image2)
-        
-        conteneur_layout.addWidget(self.widget_page1)
-        conteneur_layout.addWidget(self.widget_page2)
+        self.widget_page = ImagePagePreviewWidget(self.page_image)
+        conteneur_layout.addWidget(self.widget_page)
 
         zone.setWidget(conteneur)
         layout.addWidget(zone, 1)
@@ -187,11 +187,7 @@ class CompteRenduPreviewDialog(QDialog):
 
         page_rect = QRectF(printer.pageRect(QPrinter.Unit.DevicePixel))
 
-        self._imprimer_image_sur_page(painter, page_rect, self.page_image1)
-
-        printer.newPage()
-
-        self._imprimer_image_sur_page(painter, page_rect, self.page_image2)
+        self._imprimer_image_sur_page(painter, page_rect, self.page_image)
 
         painter.end()
         

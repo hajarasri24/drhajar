@@ -3,7 +3,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QTextEdit,
+    QToolButton,
 )
+from PySide6.QtCore import Qt
 
 
 class ExamensCliniquesPage(QWidget):
@@ -17,84 +19,45 @@ class ExamensCliniquesPage(QWidget):
         titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
-        self.cardiovasculaire = QTextEdit()
-        self.cardiovasculaire.setPlaceholderText(
-            "❤️ Examen cardiovasculaire..."
+        examens = (
+            ("cardiovasculaire", "Cardiovasculaire", "❤️ Examen cardiovasculaire..."),
+            ("pleuro", "Pleuro-pulmonaire", "🫁 Examen pleuro-pulmonaire..."),
+            ("orl", "ORL", "👂 Examen ORL..."),
+            ("abdominal", "Abdominal", "🫃 Examen abdominal..."),
+            ("ganglionnaire", "Aires ganglionnaires", "🟢 Aires ganglionnaires..."),
+            ("neurologique", "Neurologique", "🧠 Examen neurologique..."),
+            ("cutaneo", "Cutanéo-muqueux", "🩹 Examen cutanéo-muqueux..."),
+            ("locomoteur", "Locomoteur", "🦴 Examen locomoteur..."),
+            ("uro", "Uro-génital", "🚻 Examen uro-génital..."),
+            ("gyneco", "Gynécologique", "👩 Examen gynécologique..."),
         )
 
-        self.pleuro = QTextEdit()
-        self.pleuro.setPlaceholderText(
-            "🫁 Examen pleuro-pulmonaire..."
-        )
+        for attribut, libelle, indication in examens:
+            champ = QTextEdit()
+            champ.setPlaceholderText(indication)
+            champ.hide()
+            setattr(self, attribut, champ)
 
-        self.orl = QTextEdit()
-        self.orl.setPlaceholderText(
-            "👂 Examen ORL..."
-        )
+            titre_examen = QToolButton()
+            titre_examen.setText(libelle)
+            titre_examen.setCheckable(True)
+            titre_examen.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+            titre_examen.setArrowType(Qt.RightArrow)
+            titre_examen.setStyleSheet(
+                "QToolButton { font-weight: 600; text-align: left; padding: 6px; }"
+            )
+            titre_examen.toggled.connect(
+                lambda ouvert, zone=champ, titre=titre_examen: self.basculer_examen(
+                    ouvert, zone, titre
+                )
+            )
 
-        self.abdominal = QTextEdit()
-        self.abdominal.setPlaceholderText(
-            "🫃 Examen abdominal..."
-        )
-
-        self.ganglionnaire = QTextEdit()
-        self.ganglionnaire.setPlaceholderText(
-            "🟢 Aires ganglionnaires..."
-        )
-
-        self.neurologique = QTextEdit()
-        self.neurologique.setPlaceholderText(
-            "🧠 Examen neurologique..."
-        )
-
-        self.cutaneo = QTextEdit()
-        self.cutaneo.setPlaceholderText(
-            "🩹 Examen cutanéo-muqueux..."
-        )
-
-        self.locomoteur = QTextEdit()
-        self.locomoteur.setPlaceholderText(
-            "🦴 Examen locomoteur..."
-        )
-
-        self.uro = QTextEdit()
-        self.uro.setPlaceholderText(
-            "🚻 Examen uro-génital..."
-        )
-
-        self.gyneco = QTextEdit()
-        self.gyneco.setPlaceholderText(
-            "👩 Examen gynécologique..."
-        )
-
-        layout.addWidget(QLabel("Cardiovasculaire"))
-        layout.addWidget(self.cardiovasculaire)
-
-        layout.addWidget(QLabel("Pleuro-pulmonaire"))
-        layout.addWidget(self.pleuro)
-
-        layout.addWidget(QLabel("ORL"))
-        layout.addWidget(self.orl)
-
-        layout.addWidget(QLabel("Abdominal"))
-        layout.addWidget(self.abdominal)
-
-        layout.addWidget(QLabel("Aires ganglionnaires"))
-        layout.addWidget(self.ganglionnaire)
-
-        layout.addWidget(QLabel("Neurologique"))
-        layout.addWidget(self.neurologique)
-
-        layout.addWidget(QLabel("Cutanéo-muqueux"))
-        layout.addWidget(self.cutaneo)
-
-        layout.addWidget(QLabel("Locomoteur"))
-        layout.addWidget(self.locomoteur)
-
-        layout.addWidget(QLabel("Uro-génital"))
-        layout.addWidget(self.uro)
-
-        layout.addWidget(QLabel("Gynécologique"))
-        layout.addWidget(self.gyneco)
+            layout.addWidget(titre_examen)
+            layout.addWidget(champ)
 
         self.setLayout(layout)
+
+    @staticmethod
+    def basculer_examen(ouvert, zone, titre):
+        zone.setVisible(ouvert)
+        titre.setArrowType(Qt.DownArrow if ouvert else Qt.RightArrow)
