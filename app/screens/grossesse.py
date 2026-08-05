@@ -296,6 +296,8 @@ class FenetreGrossesse(QWidget):
 
             "type_grossesse":
                 self.page_echo.type_grossesse.currentText(),
+            "sexe":
+                self.page_echo.sexe.text(),
             "evolution":
                 self.page_echo.evolution.currentText(),
             "presentation":
@@ -308,12 +310,18 @@ class FenetreGrossesse(QWidget):
                 self.page_echo.lf.text(),
             "placenta":
                 self.page_echo.placenta.text(),
+            "citernes":
+                self.page_echo.citernes.text(),
             "liquide":
                 self.page_echo.liquide.text(),
             "bcf":
                 self.page_echo.bcf.text(),
             "maf":
                 self.page_echo.maf.text(),
+            "grossesse_estimee":
+                self.page_echo.grossesse_estimee.text(),
+            "date_presumee_acc":
+                self.page_echo.date_presumee_acc.date().toString("yyyy-MM-dd"),
             "ordonnance_lignes":
                 self.page_prescription.get_ordonnance_lignes(),
             "bilans_lignes":
@@ -432,6 +440,14 @@ class FenetreGrossesse(QWidget):
         self.page_echo.bcf.setText(s[23] or "")
         self.page_echo.maf.setText(s[24] or "")
 
+        self.page_echo.sexe.setText(s[30] or "")
+        self.page_echo.citernes.setText(s[31] or "")
+        self.page_echo.grossesse_estimee.setText(s[32] or "")
+        if s[33]:
+            self.page_echo.date_presumee_acc.setDate(
+                QDate.fromString(s[33], "yyyy-MM-dd")
+            )
+
         self.page_prescription.set_ordonnance_lignes(
             self.charger_ordonnance_lignes_suivi(s[0])
         )
@@ -542,11 +558,15 @@ class FenetreGrossesse(QWidget):
             bilans,
             observations,
             mutuelle_remplie,
-            facture
+            facture,
+            sexe,
+            citernes,
+            grossesse_estimee,
+            date_presumee_acc
         ) VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?
+            ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
         """, (
             self.grossesse_id,
@@ -578,6 +598,10 @@ class FenetreGrossesse(QWidget):
             d["observations"],
             int(d["mutuelle"]),
             d["facture"],
+            d["sexe"],
+            d["citernes"],
+            d["grossesse_estimee"],
+            d["date_presumee_acc"],
         ))
 
         suivi_id = curseur.lastrowid
@@ -857,6 +881,7 @@ class FenetreGrossesse(QWidget):
             "examen_clinique": self.page_examen.examen.toPlainText(),
 
             "type_grossesse": self.page_echo.type_grossesse.currentText(),
+            "sexe": self.page_echo.sexe.text(),
             "evolution": self.page_echo.evolution.currentText(),
             "presentation": self.page_echo.presentation.currentText(),
             "lcc": self.page_echo.lcc.text(),
@@ -864,11 +889,12 @@ class FenetreGrossesse(QWidget):
             "lf": self.page_echo.lf.text(),
             "liquide": self.page_echo.liquide.text(),
             "placenta": self.page_echo.placenta.text(),
+            "citernes": self.page_echo.citernes.text(),
             "bcf": self.page_echo.bcf.text(),
             "maf": self.page_echo.maf.text(),
 
-            "terme": self.page_identite.terme.text(),
-            "dpa": self.page_identite.dpa.text(),
+            "grossesse_estimee": self.page_echo.grossesse_estimee.text(),
+            "date_presumee_acc": self.page_echo.date_presumee_acc.date().toString("dd/MM/yyyy"),
         }
 
     def apercu_compte_rendu(self):

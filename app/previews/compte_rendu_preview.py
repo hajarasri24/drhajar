@@ -275,17 +275,37 @@ class CompteRenduPreviewDialog(QDialog):
         font_champ.setBold(True)
         painter.setFont(font_champ)
 
-        painter.drawText(QRectF(x(700), y(225), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["type_grossesse"])
-        painter.drawText(QRectF(x(500), y(337), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["evolution"])
-        painter.drawText(QRectF(x(400), y(450), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["presentation"])
-        painter.drawText(QRectF(x(350), y(562), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["lcc"])
-        painter.drawText(QRectF(x(350), y(674), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["bip"])
-        painter.drawText(QRectF(x(350), y(786), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["lf"])
-        painter.drawText(QRectF(x(500), y(898), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["liquide"])
-        painter.drawText(QRectF(x(350), y(1010), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["liquide"])
-        painter.drawText(QRectF(x(400), y(1122), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["placenta"])
-        painter.drawText(QRectF(x(300), y(1234), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["bcf"])
-        painter.drawText(QRectF(x(300), y(1346), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["maf"])
+        # Le modèle PDF ne contenait pas la ligne « Sexe ». On recouvre les
+        # anciens libellés et les redessine avec cette ligne en premier.
+        painter.fillRect(QRectF(x(50), y(175), 650 * sx, 1550 * sy), Qt.white)
+        font_libelle = QFont("Verdana", max(14, int(35 * sy)))
+        font_libelle.setBold(True)
+        painter.setFont(font_libelle)
 
-        painter.drawText(QRectF(x(850), y(1458), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["terme"])
-        painter.drawText(QRectF(x(900), y(1570), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["dpa"])
+        lignes = [
+            ("SEXE :", 225, d["sexe"], 350),
+            ("TYPE DE GROSSESSE :", 337, d["type_grossesse"], 700),
+            ("ÉVOLUTION :", 450, d["evolution"], 500),
+            ("SIÈGE :", 562, d["presentation"], 400),
+            ("LCC :", 674, d["lcc"], 350),
+            ("BIP :", 786, d["bip"], 350),
+            ("LF :", 898, d["lf"], 350),
+            ("CITERNES :", 1010, d["citernes"], 500),
+            ("LA :", 1122, d["liquide"], 350),
+            ("PLACENTA :", 1234, d["placenta"], 400),
+            ("BCF :", 1346, d["bcf"], 300),
+            ("MAF :", 1458, d["maf"], 300),
+        ]
+        for libelle, position_y, valeur, position_x in lignes:
+            painter.drawText(QRectF(x(85), y(position_y), 600 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, libelle)
+            painter.setFont(font_champ)
+            painter.drawText(QRectF(x(position_x), y(position_y), 900 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, valeur)
+            painter.setFont(font_libelle)
+
+        painter.drawText(QRectF(x(85), y(1570), 800 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, "10 - GROSSESSE ESTIMÉE À :")
+        painter.setFont(font_champ)
+        painter.drawText(QRectF(x(850), y(1570), 700 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["grossesse_estimee"])
+        painter.setFont(font_libelle)
+        painter.drawText(QRectF(x(85), y(1682), 850 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, "11 - DATE PRÉSUMÉE DE L'ACC. :")
+        painter.setFont(font_champ)
+        painter.drawText(QRectF(x(950), y(1682), 600 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["date_presumee_acc"])

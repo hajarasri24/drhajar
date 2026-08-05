@@ -157,6 +157,11 @@ def creer_tables():
 
         mutuelle_remplie INTEGER DEFAULT 0,
 
+        sexe TEXT,
+        citernes TEXT,
+        grossesse_estimee TEXT,
+        date_presumee_acc TEXT,
+
         FOREIGN KEY(grossesse_id)
         REFERENCES grossesses(id)
     )
@@ -353,6 +358,19 @@ def creer_tables():
         """)
     except sqlite3.OperationalError:
         pass    
+
+    # Champs ajoutés à l'échographie. Ils sont ajoutés séparément afin que les
+    # bases de données déjà créées restent compatibles.
+    for colonne in (
+        "sexe TEXT",
+        "citernes TEXT",
+        "grossesse_estimee TEXT",
+        "date_presumee_acc TEXT",
+    ):
+        try:
+            curseur.execute(f"ALTER TABLE suivi_grossesse ADD COLUMN {colonne}")
+        except sqlite3.OperationalError:
+            pass
 
     conn.commit()
 
