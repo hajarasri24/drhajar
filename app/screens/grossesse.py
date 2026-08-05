@@ -690,7 +690,7 @@ class FenetreGrossesse(QWidget):
         if not self.page_prescription.donner_controle.isChecked():
             return ""
         date = self.page_prescription.date_controle.date()
-        return f"Le contrôle à {date.toString('dd/MM/yyyy')}"
+        return f"Contrôle le {date.toString('dd/MM/yyyy')}"
 
     def apercu_ordonnance(self):
         donnees = self.construire_donnees_ordonnance()

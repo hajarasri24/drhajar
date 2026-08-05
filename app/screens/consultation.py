@@ -680,7 +680,7 @@ class FenetreConsultation(QWidget):
     def texte_controle(self):
         if not self.date_controle:
             return ""
-        return f"Le contrôle à {self.date_controle.toString('dd/MM/yyyy')}"
+        return f"Contrôle le {self.date_controle.toString('dd/MM/yyyy')}"
 
     def build_ordonnance_data(self):
         nom_patient = f"{self.patient[1]} {self.patient[2]}".strip() if self.patient else ""
