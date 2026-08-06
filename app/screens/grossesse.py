@@ -26,6 +26,7 @@ from ..pages.grossesse_echo import GrossesseEchoPage
 from ..pages.grossesse_prescription import GrossessePrescriptionPage
 from ..previews.demande_examen_preview import DemandeExamenPreviewDialog
 from ..core.paths import DATABASE_PATH
+from ..core.utils import calculer_age
 
 
 class FenetreGrossesse(QWidget):
@@ -130,6 +131,8 @@ class FenetreGrossesse(QWidget):
 
         if self.patient:
             self.page_identite.nom.setText(f"{self.patient[1]} {self.patient[2]}")
+            age = calculer_age(self.patient[7])
+            self.page_identite.age.setText(str(age) if age != "" else "")
 
         self.pages.addWidget(self.page_identite)
         self.pages.addWidget(self.page_examen)
