@@ -11,7 +11,9 @@ class ExamenParacliniquePage(QWidget):
         titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
-        layout.addWidget(QLabel("Résultats / observations"))
+        resultats_label = QLabel("Résultats / observations")
+        resultats_label.setObjectName("SectionTitle")
+        layout.addWidget(resultats_label)
         self.examen_paraclinique = QTextEdit()
         self.examen_paraclinique.setPlaceholderText(
             "Saisir les résultats ou les observations paracliniques..."

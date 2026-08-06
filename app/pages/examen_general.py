@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QTextEdit,
 )
+from ..core.ui import appliquer_style_labels_formulaire
 
 
 class ExamenGeneralPage(QWidget):
@@ -46,6 +47,7 @@ class ExamenGeneralPage(QWidget):
         formulaire.addRow("Dextro (g/L) :", self.dextro)
         formulaire.addRow("BU :", self.bu)
         formulaire.addRow("Autres :", self.autres)
+        appliquer_style_labels_formulaire(formulaire)
 
         layout.addLayout(formulaire)
 

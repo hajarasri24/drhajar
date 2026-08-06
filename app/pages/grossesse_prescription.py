@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QDateEdit,
     QPushButton,
-    QScrollArea,
+    QSizePolicy,
 )
 from PySide6.QtCore import QDate, Qt
 
@@ -23,12 +23,16 @@ class GrossessePrescriptionPage(QWidget):
         self.lignes_bilans = []
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(8)
 
         titre = QLabel("PRESCRIPTION")
         titre.setObjectName("PageTitle")
+        titre.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         layout.addWidget(titre)
 
         ordonnance_label = QLabel("Ordonnance")
+        ordonnance_label.setObjectName("SectionTitle")
         layout.addWidget(ordonnance_label)
 
         self.zone_lignes = QVBoxLayout()
@@ -39,13 +43,10 @@ class GrossessePrescriptionPage(QWidget):
         conteneur_lignes = QWidget()
         conteneur_lignes.setLayout(self.zone_lignes)
         conteneur_lignes.setContentsMargins(0, 0, 0, 0)
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(conteneur_lignes)
-        scroll.setMinimumHeight(150)
-        scroll.setMaximumHeight(190)
-        layout.addWidget(scroll)
+        conteneur_lignes.setSizePolicy(
+            QSizePolicy.Preferred, QSizePolicy.Maximum
+        )
+        layout.addWidget(conteneur_lignes)
 
         boutons_ordonnance = QHBoxLayout()
         self.btn_ajouter_ligne = QPushButton("+ Ajouter un médicament")
@@ -59,6 +60,7 @@ class GrossessePrescriptionPage(QWidget):
         layout.addLayout(boutons_ordonnance)
 
         bilans_label = QLabel("Bilans demandés structurés")
+        bilans_label.setObjectName("SectionTitle")
         layout.addWidget(bilans_label)
 
         self.zone_bilans = QVBoxLayout()
@@ -69,13 +71,10 @@ class GrossessePrescriptionPage(QWidget):
         conteneur_bilans = QWidget()
         conteneur_bilans.setLayout(self.zone_bilans)
         conteneur_bilans.setContentsMargins(0, 0, 0, 0)
-
-        scroll_bilans = QScrollArea()
-        scroll_bilans.setWidgetResizable(True)
-        scroll_bilans.setWidget(conteneur_bilans)
-        scroll_bilans.setMinimumHeight(130)
-        scroll_bilans.setMaximumHeight(170)
-        layout.addWidget(scroll_bilans)
+        conteneur_bilans.setSizePolicy(
+            QSizePolicy.Preferred, QSizePolicy.Maximum
+        )
+        layout.addWidget(conteneur_bilans)
 
         boutons_bilans = QHBoxLayout()
         self.btn_ajouter_bilan = QPushButton("+ Ajouter un bilan")
@@ -88,10 +87,12 @@ class GrossessePrescriptionPage(QWidget):
         layout.addLayout(boutons_bilans)
 
         observations_label = QLabel("Observations")
+        observations_label.setObjectName("SectionTitle")
         layout.addWidget(observations_label)
 
         self.observations = QTextEdit()
-        self.observations.setFixedHeight(500)
+        self.observations.setMinimumHeight(140)
+        self.observations.setMaximumHeight(240)
         layout.addWidget(self.observations)
 
         self.donner_controle = QCheckBox("Donner un contrôle")

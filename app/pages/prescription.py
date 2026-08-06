@@ -23,6 +23,7 @@ class PrescriptionPage(QWidget):
         layout.addWidget(titre)
 
         ordonnance_label = QLabel("💊 Ordonnance structurée")
+        ordonnance_label.setObjectName("SectionTitle")
         layout.addWidget(ordonnance_label)
 
         self.zone_lignes = QVBoxLayout()
@@ -47,6 +48,7 @@ class PrescriptionPage(QWidget):
         layout.addLayout(actions)
 
         examens_label = QLabel("🧪 Examens complémentaires structurés")
+        examens_label.setObjectName("SectionTitle")
         layout.addWidget(examens_label)
 
         self.zone_examens = QVBoxLayout()
@@ -71,6 +73,7 @@ class PrescriptionPage(QWidget):
         layout.addLayout(actions_examens)
 
         observation_label = QLabel("Observations")
+        observation_label.setObjectName("SectionTitle")
         layout.addWidget(observation_label)
 
         self.observation = QTextEdit()

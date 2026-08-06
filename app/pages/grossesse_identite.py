@@ -9,7 +9,8 @@ from PySide6.QtWidgets import (
     QComboBox,
 )
 
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, Qt
+from ..core.ui import appliquer_style_labels_formulaire
 
 
 class GrossesseIdentitePage(QWidget):
@@ -17,13 +18,19 @@ class GrossesseIdentitePage(QWidget):
     def __init__(self):
         super().__init__()
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(8)
 
         titre = QLabel("DONNÉES OBSTÉTRICALES")
         titre.setObjectName("PageTitle")
+        titre.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         layout.addWidget(titre)
 
         formulaire = QFormLayout()
+        formulaire.setHorizontalSpacing(24)
+        formulaire.setVerticalSpacing(8)
+        formulaire.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.nom = QLineEdit()
         self.nom.setReadOnly(True)
@@ -88,10 +95,10 @@ class GrossesseIdentitePage(QWidget):
         formulaire.addRow("DPA :", self.dpa)
         formulaire.addRow("Terme :", self.terme)
         formulaire.addRow("Statut :", self.statut)
+        appliquer_style_labels_formulaire(formulaire)
 
         layout.addLayout(formulaire)
-
-        self.setLayout(layout)
+        layout.addStretch()
 
     def calculer_dates(self):
 

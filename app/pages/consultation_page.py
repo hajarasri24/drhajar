@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QDate
 from ..core.utils import calculer_age
+from ..core.ui import appliquer_style_labels_formulaire
 
 class ConsultationPage(QWidget):
 
@@ -21,11 +22,7 @@ class ConsultationPage(QWidget):
         layout.addWidget(titre)
 
         self.patient_label = QLabel("Patient :")
-        self.patient_label.setStyleSheet(
-            "font-size:16px;"
-            "font-weight:bold;"
-            "color:blue;"
-        )
+        self.patient_label.setObjectName("SectionTitle")
 
         layout.addWidget(self.patient_label)
 
@@ -72,6 +69,7 @@ class ConsultationPage(QWidget):
             "Histoire de la maladie :",
             self.histoire
         )
+        appliquer_style_labels_formulaire(formulaire)
 
         layout.addLayout(formulaire)
 

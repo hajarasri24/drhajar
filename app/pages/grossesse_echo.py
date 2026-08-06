@@ -8,7 +8,8 @@ from PySide6.QtWidgets import (
     QDateEdit,
 )
 
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, Qt
+from ..core.ui import appliquer_style_labels_formulaire
 
 
 class GrossesseEchoPage(QWidget):
@@ -16,13 +17,19 @@ class GrossesseEchoPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(8)
 
         titre = QLabel("ÉCHOGRAPHIE")
         titre.setObjectName("PageTitle")
+        titre.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         layout.addWidget(titre)
 
         formulaire = QFormLayout()
+        formulaire.setHorizontalSpacing(24)
+        formulaire.setVerticalSpacing(8)
+        formulaire.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.sexe = QLineEdit()
 
@@ -78,10 +85,10 @@ class GrossesseEchoPage(QWidget):
         formulaire.addRow("MAF :", self.maf)
         formulaire.addRow("Grossesse estimée à :", self.grossesse_estimee)
         formulaire.addRow("Date présumée de l'acc. :", self.date_presumee_acc)
+        appliquer_style_labels_formulaire(formulaire)
 
         layout.addLayout(formulaire)
-
-        self.setLayout(layout)
+        layout.addStretch()
 
         self.calculer_grossesse_estimee()
 

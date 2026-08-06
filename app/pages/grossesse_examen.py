@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QTextEdit,
 )
+from PySide6.QtCore import Qt
+from ..core.ui import appliquer_style_labels_formulaire
 
 
 class GrossesseExamenPage(QWidget):
@@ -13,13 +15,19 @@ class GrossesseExamenPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(8)
 
         titre = QLabel("EXAMEN CLINIQUE")
         titre.setObjectName("PageTitle")
+        titre.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         layout.addWidget(titre)
 
         formulaire = QFormLayout()
+        formulaire.setHorizontalSpacing(24)
+        formulaire.setVerticalSpacing(8)
+        formulaire.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.ta = QLineEdit()
         self.fc = QLineEdit()
@@ -46,7 +54,7 @@ class GrossesseExamenPage(QWidget):
         formulaire.addRow("Hauteur utérine :", self.hu)
         formulaire.addRow("Auscultation :", self.auscultation)
         formulaire.addRow("Examen clinique :", self.examen)
+        appliquer_style_labels_formulaire(formulaire)
 
         layout.addLayout(formulaire)
-
-        self.setLayout(layout)
+        layout.addStretch()

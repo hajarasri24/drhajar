@@ -12,7 +12,9 @@ class FacturationPage(QWidget):
         titre.setObjectName("PageTitle")
         layout.addWidget(titre)
 
-        layout.addWidget(QLabel("Montant de la consultation"))
+        montant_label = QLabel("Montant de la consultation")
+        montant_label.setObjectName("SectionTitle")
+        layout.addWidget(montant_label)
         self.montant = QLineEdit()
         self.montant.setPlaceholderText("Ex. 250")
         self.montant.setValidator(QIntValidator(0, 999999999, self))
