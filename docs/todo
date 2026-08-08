@@ -1,12 +1,13 @@
-1. order by number of dossier ✅
-2. le controle a DD/MM/YYYY after assigning a day ✅
-3. Presentation (grossesse) : add en place ✅
-4. add Citernes bellow placentas which have one text field also in compte rendu ✅
-5. the case of compte rendu, separate the pages in all (apercu, imprimer) for each one ✅
-6. add a new field in the echographie, called Sexe, in the CR it should be added at 9: (Examen Echo) ✅
-7. add two other fields in echographie in grossesse (10 and 11) ✅
-8. in examen cliniques in simple consultation, the field text area should appear only if we click on the title there  ✅
-9. add see and not see in the in the ordonnance and the bilan and also the ones of the grossesses ✅
-10. edit and delete the date of the controle ✅
-11. check the repetitive controle ✅
-12. save the names as title() ✅
+1. copy the database, so if it crashes we still have backup: cp data/drhajar.db data/database_backup_before_cascade.db
+2. check if the backup is there: ls -lh data/
+3. run migrate_cascade.py
+4. enter the database sqlite3 data/drhajar.db
+5. run this: PRAGMA foreign_keys = ON;
+6. run these: PRAGMA foreign_key_list(consultations);
+    PRAGMA foreign_key_list(grossesses);
+    PRAGMA foreign_key_list(suivi_grossesse);
+    PRAGMA foreign_key_list(rendez_vous);
+    PRAGMA foreign_key_list(documents);
+    PRAGMA foreign_key_list(ordonnance_lignes);
+    PRAGMA foreign_key_list(demande_examen_lignes);
+7.  now delete the test patient and see if all its data deleted 

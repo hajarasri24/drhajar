@@ -5,7 +5,13 @@ from .paths import DATA_DIR, DATABASE_PATH
 
 def creer_tables():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+
     conn = sqlite3.connect(DATABASE_PATH)
+
+    # IMPORTANT:
+    # SQLite does not enforce foreign keys by default.
+    conn.execute("PRAGMA foreign_keys = ON")
+
     curseur = conn.cursor()
 
     # ==========================================================
@@ -41,11 +47,11 @@ def creer_tables():
 
         patient_id INTEGER,
 
-       date_consultation TEXT,
-       motif TEXT,
-       signes_fonctionnels TEXT,
-       atcd TEXT,
-       histoire_maladie TEXT,
+        date_consultation TEXT,
+        motif TEXT,
+        signes_fonctionnels TEXT,
+        atcd TEXT,
+        histoire_maladie TEXT,
 
         poids TEXT,
         taille TEXT,
@@ -75,11 +81,12 @@ def creer_tables():
         examens_complementaires TEXT,
         ordonnance TEXT,
         observation TEXT,
-                    
-        mutuelle_remplie INTEGER DEFAULT 0,            
+
+        mutuelle_remplie INTEGER DEFAULT 0,
 
         FOREIGN KEY(patient_id)
-        REFERENCES patients(id)
+            REFERENCES patients(id)
+            ON DELETE CASCADE
 
     )
     """)
@@ -110,11 +117,16 @@ def creer_tables():
         statut TEXT,
 
         FOREIGN KEY(patient_id)
-        REFERENCES patients(id)
+            REFERENCES patients(id)
+            ON DELETE CASCADE
 
     )
     """)
-    
+
+    # ==========================================================
+    # TABLE SUIVI GROSSESSE
+    # ==========================================================
+
     curseur.execute("""
     CREATE TABLE IF NOT EXISTS suivi_grossesse (
 
@@ -163,7 +175,9 @@ def creer_tables():
         date_presumee_acc TEXT,
 
         FOREIGN KEY(grossesse_id)
-        REFERENCES grossesses(id)
+            REFERENCES grossesses(id)
+            ON DELETE CASCADE
+
     )
     """)
 
@@ -185,95 +199,130 @@ def creer_tables():
         statut TEXT DEFAULT 'Prévu',
 
         FOREIGN KEY(patient_id)
-        REFERENCES patients(id)
+            REFERENCES patients(id)
+            ON DELETE CASCADE
 
     )
     """)
-    
+
     # ==========================================================
     # TABLE ORDONNANCES
     # ==========================================================
 
     curseur.execute("""
     CREATE TABLE IF NOT EXISTS ordonnances (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        type_source TEXT NOT NULL,          -- 'consultation' ou 'grossesse'
-        source_id INTEGER NOT NULL,         -- consultation_id ou suivi_grossesse_id
+
+        type_source TEXT NOT NULL,
+        source_id INTEGER NOT NULL,
+
         date_creation TEXT,
         nom_patient TEXT,
         poids TEXT
+
     )
     """)
 
+    # ==========================================================
+    # TABLE LIGNES ORDONNANCE
+    # ==========================================================
+
     curseur.execute("""
     CREATE TABLE IF NOT EXISTS ordonnance_lignes (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+
         ordonnance_id INTEGER NOT NULL,
+
         medicament TEXT NOT NULL,
         posologie TEXT,
         duree TEXT,
         remarque TEXT,
+
         visible INTEGER NOT NULL DEFAULT 1,
         ordre INTEGER DEFAULT 0,
-        FOREIGN KEY(ordonnance_id) REFERENCES ordonnances(id)
+
+        FOREIGN KEY(ordonnance_id)
+            REFERENCES ordonnances(id)
+            ON DELETE CASCADE
+
     )
     """)
-    
-        # ==========================================================
+
+    # ==========================================================
     # TABLE DEMANDES D'EXAMENS
     # ==========================================================
 
     curseur.execute("""
-        CREATE TABLE IF NOT EXISTS demandes_examens (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            type_source TEXT NOT NULL, -- 'consultation' ou 'grossesse'
-            source_id INTEGER NOT NULL, -- consultation_id ou suivi_grossesse_id
-            date_creation TEXT,
-            nom_patient TEXT,
-            poids TEXT
-        )
+    CREATE TABLE IF NOT EXISTS demandes_examens (
+
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        type_source TEXT NOT NULL,
+        source_id INTEGER NOT NULL,
+
+        date_creation TEXT,
+        nom_patient TEXT,
+        poids TEXT
+
+    )
     """)
 
+    # ==========================================================
+    # TABLE LIGNES DEMANDE D'EXAMEN
+    # ==========================================================
+
     curseur.execute("""
-        CREATE TABLE IF NOT EXISTS demande_examen_lignes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            demande_id INTEGER NOT NULL,
-            examen TEXT NOT NULL,
-            remarque TEXT,
-            visible INTEGER NOT NULL DEFAULT 1,
-            ordre INTEGER DEFAULT 0,
-            FOREIGN KEY(demande_id) REFERENCES demandes_examens(id)
-        )
+    CREATE TABLE IF NOT EXISTS demande_examen_lignes (
+
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        demande_id INTEGER NOT NULL,
+
+        examen TEXT NOT NULL,
+        remarque TEXT,
+
+        visible INTEGER NOT NULL DEFAULT 1,
+        ordre INTEGER DEFAULT 0,
+
+        FOREIGN KEY(demande_id)
+            REFERENCES demandes_examens(id)
+            ON DELETE CASCADE
+
+    )
     """)
-    
+
     # ==========================================================
     # TABLE DOCUMENTS
     # ==========================================================
 
     curseur.execute("""
-        CREATE TABLE IF NOT EXISTS documents (
+    CREATE TABLE IF NOT EXISTS documents (
 
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-            patient_id INTEGER NOT NULL,
+        patient_id INTEGER NOT NULL,
 
-            nom_fichier TEXT,
-            chemin_fichier TEXT NOT NULL,
-            type_fichier TEXT,
-            date_ajout TEXT,
+        nom_fichier TEXT,
+        chemin_fichier TEXT NOT NULL,
+        type_fichier TEXT,
+        date_ajout TEXT,
 
-            FOREIGN KEY(patient_id)
+        FOREIGN KEY(patient_id)
             REFERENCES patients(id)
+            ON DELETE CASCADE
 
-        )
+    )
     """)
 
     # ==========================================================
     # MISES À JOUR AUTOMATIQUES
     # ==========================================================
 
-    # Renommage de l'ancienne colonne de consultation « facture ».
-    # Les champs de facturation de grossesse ne sont pas concernés.
+    # ----------------------------------------------------------
+    # Renommage de l'ancienne colonne facture
+    # ----------------------------------------------------------
 
     try:
         curseur.execute("""
@@ -283,6 +332,10 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
+    # ----------------------------------------------------------
+    # Observation
+    # ----------------------------------------------------------
+
     try:
         curseur.execute("""
             ALTER TABLE consultations
@@ -291,7 +344,9 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
-    # Colonne téléphone
+    # ----------------------------------------------------------
+    # Téléphone
+    # ----------------------------------------------------------
 
     try:
         curseur.execute("""
@@ -301,7 +356,9 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
-    # Colonne ATCD
+    # ----------------------------------------------------------
+    # ATCD
+    # ----------------------------------------------------------
 
     try:
         curseur.execute("""
@@ -311,6 +368,10 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
+    # ----------------------------------------------------------
+    # Mutuelle consultation
+    # ----------------------------------------------------------
+
     try:
         curseur.execute("""
             ALTER TABLE consultations
@@ -319,16 +380,21 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
-    # Nouvelles sections de la consultation
+    # ----------------------------------------------------------
+    # Suppression ancienne colonne gestes_medicaux
+    # ----------------------------------------------------------
+
     try:
         curseur.execute("""
             ALTER TABLE consultations
             DROP COLUMN gestes_medicaux
         """)
     except sqlite3.OperationalError:
-        # Les anciennes versions de SQLite ne prennent pas en charge DROP COLUMN.
-        # La colonne n'est plus utilisée par l'application dans ce cas.
         pass
+
+    # ----------------------------------------------------------
+    # Examen paraclinique
+    # ----------------------------------------------------------
 
     try:
         curseur.execute("""
@@ -338,6 +404,10 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
+    # ----------------------------------------------------------
+    # Montant facturation
+    # ----------------------------------------------------------
+
     try:
         curseur.execute("""
             ALTER TABLE consultations
@@ -346,15 +416,139 @@ def creer_tables():
     except sqlite3.OperationalError:
         pass
 
-    # Visibilité des lignes dans les aperçus/impressions d'ordonnance et de bilan.
-    # Les lignes existantes restent visibles par défaut.
+    # ----------------------------------------------------------
+    # Visibilité des lignes
+    # ----------------------------------------------------------
+
     for table in ("ordonnance_lignes", "demande_examen_lignes"):
+
         try:
             curseur.execute(
-                f"ALTER TABLE {table} ADD COLUMN visible INTEGER NOT NULL DEFAULT 1"
+                f"""
+                ALTER TABLE {table}
+                ADD COLUMN visible INTEGER NOT NULL DEFAULT 1
+                """
             )
         except sqlite3.OperationalError:
             pass
+
+    # ==========================================================
+    # MISE À JOUR GROSSESSES
+    # ==========================================================
+
+    try:
+        curseur.execute("""
+            ALTER TABLE grossesses
+            ADD COLUMN mutuelle_remplie INTEGER DEFAULT 0
+        """)
+    except sqlite3.OperationalError:
+        pass
+
+    # ==========================================================
+    # MISE À JOUR SUIVI GROSSESSE
+    # ==========================================================
+
+    for colonne in (
+        "sexe TEXT",
+        "citernes TEXT",
+        "grossesse_estimee TEXT",
+        "date_presumee_acc TEXT",
+    ):
+
+        try:
+            curseur.execute(
+                f"""
+                ALTER TABLE suivi_grossesse
+                ADD COLUMN {colonne}
+                """
+            )
+        except sqlite3.OperationalError:
+            pass
+
+    # ==========================================================
+    # TRIGGERS DE SUPPRESSION
+    # ==========================================================
+    #
+    # Les tables ordonnances et demandes_examens utilisent :
+    #
+    #     type_source
+    #     source_id
+    #
+    # donc source_id peut pointer vers différentes tables.
+    #
+    # SQLite ne peut pas créer une FK classique dans ce cas.
+    #
+    # Les triggers permettent donc de supprimer automatiquement
+    # ces données lorsque le patient est supprimé.
+    # ==========================================================
+
+    # ----------------------------------------------------------
+    # Suppression des ordonnances liées aux consultations
+    # ----------------------------------------------------------
+
+    curseur.execute("""
+    CREATE TRIGGER IF NOT EXISTS delete_ordonnances_consultation
+    AFTER DELETE ON consultations
+    BEGIN
+
+        DELETE FROM ordonnances
+        WHERE type_source = 'consultation'
+        AND source_id = OLD.id;
+
+    END
+    """)
+
+    # ----------------------------------------------------------
+    # Suppression des ordonnances liées aux suivis grossesse
+    # ----------------------------------------------------------
+
+    curseur.execute("""
+    CREATE TRIGGER IF NOT EXISTS delete_ordonnances_grossesse
+    AFTER DELETE ON suivi_grossesse
+    BEGIN
+
+        DELETE FROM ordonnances
+        WHERE type_source = 'grossesse'
+        AND source_id = OLD.id;
+
+    END
+    """)
+
+    # ----------------------------------------------------------
+    # Suppression des demandes d'examens liées aux consultations
+    # ----------------------------------------------------------
+
+    curseur.execute("""
+    CREATE TRIGGER IF NOT EXISTS delete_demandes_examens_consultation
+    AFTER DELETE ON consultations
+    BEGIN
+
+        DELETE FROM demandes_examens
+        WHERE type_source = 'consultation'
+        AND source_id = OLD.id;
+
+    END
+    """)
+
+    # ----------------------------------------------------------
+    # Suppression des demandes d'examens liées aux suivis grossesse
+    # ----------------------------------------------------------
+
+    curseur.execute("""
+    CREATE TRIGGER IF NOT EXISTS delete_demandes_examens_grossesse
+    AFTER DELETE ON suivi_grossesse
+    BEGIN
+
+        DELETE FROM demandes_examens
+        WHERE type_source = 'grossesse'
+        AND source_id = OLD.id;
+
+    END
+    """)
+
+    # ==========================================================
+    # AFFICHAGE DES COLONNES
+    # ==========================================================
 
     curseur.execute("PRAGMA table_info(consultations)")
 
@@ -363,36 +557,21 @@ def creer_tables():
     for colonne in curseur.fetchall():
         print(colonne)
 
-    try:
-        curseur.execute("""
-            ALTER TABLE grossesses
-            ADD COLUMN mutuelle_remplie INTEGER DEFAULT 0
-        """)
-    except sqlite3.OperationalError:
-        pass    
-
-    # Champs ajoutés à l'échographie. Ils sont ajoutés séparément afin que les
-    # bases de données déjà créées restent compatibles.
-    for colonne in (
-        "sexe TEXT",
-        "citernes TEXT",
-        "grossesse_estimee TEXT",
-        "date_presumee_acc TEXT",
-    ):
-        try:
-            curseur.execute(f"ALTER TABLE suivi_grossesse ADD COLUMN {colonne}")
-        except sqlite3.OperationalError:
-            pass
-
-    conn.commit()
-
     curseur.execute("PRAGMA table_info(suivi_grossesse)")
+
+    print("\nColonnes de la table suivi_grossesse :")
+
     for colonne in curseur.fetchall():
         print(colonne)
 
+    # ==========================================================
+    # VALIDATION
+    # ==========================================================
+
+    conn.commit()
     conn.close()
+
 
 if __name__ == "__main__":
     creer_tables()
     print("Base de données mise à jour.")
-    

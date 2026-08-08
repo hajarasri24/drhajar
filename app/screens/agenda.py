@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QDialog,
     QMessageBox,
+    QLineEdit,
 )
 
 from PySide6.QtCore import QDate, Qt, QSize
@@ -53,6 +54,38 @@ class FenetreAgenda(QWidget):
         header_layout.addWidget(sous_titre)
 
         layout.addWidget(carte_header)
+        
+        # ================= RECHERCHE PATIENT =================
+
+        carte_recherche = QFrame()
+        carte_recherche.setObjectName("Card")
+
+        recherche_layout = QVBoxLayout(carte_recherche)
+        recherche_layout.setContentsMargins(22, 22, 22, 22)
+        recherche_layout.setSpacing(10)
+
+        titre_recherche = QLabel("Rechercher un patient")
+        titre_recherche.setObjectName("SectionTitle")
+        recherche_layout.addWidget(titre_recherche)
+
+        self.recherche_patient = QLineEdit()
+        self.recherche_patient.setPlaceholderText(
+            "Nom, prénom ou CNI du patient..."
+        )
+        self.recherche_patient.setMinimumHeight(42)
+        recherche_layout.addWidget(self.recherche_patient)
+
+        self.resultat_recherche = QLabel()
+        self.resultat_recherche.setObjectName("MutedLabel")
+        self.resultat_recherche.setWordWrap(True)
+        recherche_layout.addWidget(self.resultat_recherche)
+
+        layout.addWidget(carte_recherche)
+
+        # Recherche lorsqu'on appuie sur Entrée
+        self.recherche_patient.returnPressed.connect(
+            self.rechercher_patient
+        )
 
         # ================= CALENDAR CARD =================
 
@@ -289,3 +322,103 @@ class FenetreAgenda(QWidget):
         conn.commit()
         conn.close()
         self.charger_rendez_vous()
+
+    def rechercher_patient(self):
+        recherche = " ".join(
+            self.recherche_patient.text().strip().split()
+        )
+
+        if not recherche:
+            self.resultat_recherche.setText(
+                "Veuillez saisir le nom, le prénom ou la CNI du patient."
+            )
+            return
+
+        conn = sqlite3.connect(DATABASE_PATH)
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            SELECT
+                id,
+                nom,
+                prenom,
+                cni
+            FROM patients
+            WHERE
+                nom LIKE ?
+                OR prenom LIKE ?
+                OR cni LIKE ?
+                OR (prenom || ' ' || nom) LIKE ?
+                OR (nom || ' ' || prenom) LIKE ?
+            ORDER BY nom, prenom
+        """, (
+            f"%{recherche}%",
+            f"%{recherche}%",
+            f"%{recherche}%",
+            f"%{recherche}%",
+            f"%{recherche}%",
+        ))
+
+        patients = curseur.fetchall()
+        
+        if not patients:
+            conn.close()
+
+            self.resultat_recherche.setText(
+                f"❌ Aucun patient trouvé pour « {recherche} »."
+            )
+            return
+
+        # Construire le résultat
+        resultats = []
+
+        for patient in patients:
+            patient_id = patient[0]
+            nom = patient[1]
+            prenom = patient[2]
+
+            # Chercher les contrôles du patient
+            curseur.execute("""
+                SELECT date_rdv, type, statut
+                FROM rendez_vous
+                WHERE patient_id = ?
+                ORDER BY date_rdv
+            """, (patient_id,))
+
+            controles = curseur.fetchall()
+
+            nom_complet = f"{prenom} {nom}"
+
+            if not controles:
+                resultats.append(
+                    f"👤 {nom_complet}\n"
+                    f"⚠️ Ce patient n'a aucun contrôle programmé."
+                )
+
+            else:
+                texte = f"👤 {nom_complet}\n"
+
+                for controle in controles:
+                    date_rdv = QDate.fromString(
+                        controle[0],
+                        "yyyy-MM-dd"
+                    )
+
+                    date_formatee = date_rdv.toString(
+                        "dddd dd MMMM yyyy"
+                    )
+
+                    type_controle = controle[1]
+
+                    texte += (
+                        f"📅 Contrôle : {date_formatee}"
+                        f"  •  {type_controle}\n"
+                    )
+
+                resultats.append(texte.strip())
+
+        conn.close()
+
+        self.resultat_recherche.setText(
+            "\n\n".join(resultats)
+        )
