@@ -9,8 +9,10 @@ from PySide6.QtWidgets import (
 )
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from app.core.theme import apply_theme
 from app.core.database import creer_tables
+from app.core.paths import ICON_PATH
 from app.screens.patient import FenetrePatient
 from app.screens.ancien_patient import FenetreAncienPatient
 from app.screens.grossesses_en_cours import FenetreGrossessesEnCours
@@ -20,6 +22,7 @@ from app.screens.certificat_rapport import FenetreCertificatRapport
 creer_tables()
 
 app = QApplication(sys.argv)
+app.setWindowIcon(QIcon(str(ICON_PATH)))
 apply_theme(app)
 
 fenetre = QWidget()

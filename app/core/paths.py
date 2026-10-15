@@ -27,6 +27,7 @@ def _dossier_ressources():
 PROJECT_ROOT = _dossier_exe()
 ASSETS_DIR = _dossier_ressources() / "assets"
 TEMPLATES_DIR = ASSETS_DIR / "templates"
+ICON_PATH = ASSETS_DIR / "icon" / "drhajar.ico"
 DATA_DIR = PROJECT_ROOT / "data"
 DATABASE_PATH = DATA_DIR / "drhajar.db"
 DOCUMENTS_DIR = DATA_DIR / "documents"

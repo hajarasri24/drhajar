@@ -27,6 +27,7 @@ jobs:
       - name: Construire le .exe
         run: >
           pyinstaller --onefile --windowed --name DrHajar
+          --icon "assets/icon/drhajar.ico"
           --add-data "assets;assets"
           main.py
 
