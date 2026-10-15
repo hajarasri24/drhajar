@@ -20,15 +20,10 @@ class LigneMedicament(QWidget):
         self.medicament.setMaximumHeight(40)
 
         self.posologie = QLineEdit()
-        self.posologie.setPlaceholderText("Ex: 2 fois/jour")
+        self.posologie.setPlaceholderText("Ex: 2 fois/jour pendant 7 jours")
         self.posologie.setMinimumHeight(40)
         self.posologie.setMaximumHeight(40)
 
-        self.duree = QLineEdit()
-        self.duree.setPlaceholderText("Ex: 7 jours")
-        self.duree.setMinimumHeight(40)
-        self.duree.setMaximumHeight(40)
-        
         self.remarque = QLineEdit()
         self.remarque.setPlaceholderText("Ex: Remarque")
         self.remarque.setMinimumHeight(40)
@@ -45,10 +40,9 @@ class LigneMedicament(QWidget):
         self.btn_apercu.toggled.connect(self.mettre_a_jour_bouton_apercu)
         self.mettre_a_jour_bouton_apercu(True)
 
-        layout.addWidget(self.medicament, 3)
+        layout.addWidget(self.medicament, 2)
         layout.addWidget(self.posologie, 2)
-        layout.addWidget(self.duree, 2)
-        layout.addWidget(self.remarque, 2)
+        layout.addWidget(self.remarque, 5)
         layout.addWidget(self.btn_apercu)
         layout.addWidget(self.btn_supprimer)
 
@@ -56,7 +50,6 @@ class LigneMedicament(QWidget):
         return {
             "medicament": self.medicament.text().strip(),
             "posologie": self.posologie.text().strip(),
-            "duree": self.duree.text().strip(),
             "remarque": self.remarque.text().strip(),
             "visible": self.btn_apercu.isChecked(),
         }
@@ -64,7 +57,6 @@ class LigneMedicament(QWidget):
     def set_data(self, data):
         self.medicament.setText(data.get("medicament", ""))
         self.posologie.setText(data.get("posologie", ""))
-        self.duree.setText(data.get("duree", ""))
         self.remarque.setText(data.get("remarque", ""))
         self.btn_apercu.setChecked(bool(data.get("visible", True)))
 

@@ -104,7 +104,6 @@ class PrescriptionPage(QWidget):
         if len(self.lignes_medicaments) == 1:
             ligne.medicament.clear()
             ligne.posologie.clear()
-            ligne.duree.clear()
             return
 
         self.lignes_medicaments.remove(ligne)

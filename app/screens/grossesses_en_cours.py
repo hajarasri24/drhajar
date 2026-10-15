@@ -51,7 +51,7 @@ class FenetreGrossessesEnCours(QWidget):
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels([
             "Patiente",
-            "DPA",
+            "EDD",
             "Visites"
         ])
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -91,7 +91,15 @@ class FenetreGrossessesEnCours(QWidget):
             patients.nom,
             patients.prenom,
             grossesses.ddr,
-            grossesses.dpa,
+            (
+                SELECT date_presumee_acc
+                FROM suivi_grossesse
+                WHERE suivi_grossesse.grossesse_id = grossesses.id
+                    AND date_presumee_acc IS NOT NULL
+                    AND date_presumee_acc != ''
+                ORDER BY suivi_grossesse.id DESC
+                LIMIT 1
+            ),
             COUNT(suivi_grossesse.id)
         FROM grossesses
         JOIN patients

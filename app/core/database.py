@@ -237,7 +237,6 @@ def creer_tables():
 
         medicament TEXT NOT NULL,
         posologie TEXT,
-        duree TEXT,
         remarque TEXT,
 
         visible INTEGER NOT NULL DEFAULT 1,
@@ -431,6 +430,33 @@ def creer_tables():
             )
         except sqlite3.OperationalError:
             pass
+
+    # ----------------------------------------------------------
+    # Fusion de "posologie" et "duree" en une seule colonne
+    # ----------------------------------------------------------
+    # Avant il y avait 2 colonnes séparées : posologie et duree.
+    # Maintenant il n'y en a qu'une seule : posologie, qui contient
+    # les deux informations (ex: "2 fois/jour pendant 7 jours").
+
+    try:
+        curseur.execute("""
+            UPDATE ordonnance_lignes
+            SET posologie = TRIM(
+                COALESCE(posologie, '') ||
+                CASE
+                    WHEN duree IS NOT NULL AND duree != ''
+                    THEN ' pendant ' || duree
+                    ELSE ''
+                END
+            )
+        """)
+
+        curseur.execute("""
+            ALTER TABLE ordonnance_lignes
+            DROP COLUMN duree
+        """)
+    except sqlite3.OperationalError:
+        pass
 
     # ==========================================================
     # MISE À JOUR GROSSESSES

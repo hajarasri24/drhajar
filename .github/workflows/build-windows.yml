@@ -1,0 +1,37 @@
+name: Construire l'application Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Construire le .exe
+        run: >
+          pyinstaller --onefile --windowed --name DrHajar
+          --add-data "assets;assets"
+          main.py
+
+      - name: Mettre le .exe en ligne (à télécharger)
+        uses: actions/upload-artifact@v4
+        with:
+          name: DrHajar-windows
+          path: dist/DrHajar.exe

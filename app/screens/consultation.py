@@ -418,13 +418,12 @@ class FenetreConsultation(QWidget):
         for i, ligne in enumerate(lignes):
             remarque = ligne.get("remarque", "")
             curseur.execute("""
-                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, duree, remarque, visible, ordre)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO ordonnance_lignes (ordonnance_id, medicament, posologie, remarque, visible, ordre)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 ordonnance_id,
                 ligne["medicament"],
                 ligne["posologie"],
-                ligne["duree"],
                 remarque,
                 int(ligne["visible"]),
                 i
@@ -623,7 +622,7 @@ class FenetreConsultation(QWidget):
         curseur = conn.cursor()
 
         curseur.execute("""
-            SELECT ol.medicament, ol.posologie, ol.duree, ol.remarque, ol.visible
+            SELECT ol.medicament, ol.posologie, ol.remarque, ol.visible
             FROM ordonnances o
             JOIN ordonnance_lignes ol
                 ON ol.ordonnance_id = o.id
@@ -635,9 +634,8 @@ class FenetreConsultation(QWidget):
             {
                 "medicament": row[0] or "",
                 "posologie": row[1] or "",
-                "duree": row[2] or "",
-                "remarque": row[3] or "",
-                "visible": bool(row[4])
+                "remarque": row[2] or "",
+                "visible": bool(row[3])
             }
             for row in curseur.fetchall()
         ]

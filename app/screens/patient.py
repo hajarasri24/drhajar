@@ -197,8 +197,39 @@ class FenetrePatient(QWidget):
             )
             return
 
+        nom = self.nom.text().title()
+        prenom = self.prenom.text().title()
+        cni = self.cni.text().upper()
+
         conn = sqlite3.connect(DATABASE_PATH)
         curseur = conn.cursor()
+
+        # Un patient ne doit être enregistré qu'une seule fois.
+        # On vérifie avec le CNI, sauf quand le CNI est "NONE"
+        # (patient sans CNI connu) : dans ce cas on vérifie
+        # avec le nom et le prénom à la place.
+        if cni == "NONE":
+            curseur.execute("""
+                SELECT id FROM patients
+                WHERE nom = ? AND prenom = ?
+            """, (nom, prenom))
+        else:
+            curseur.execute("""
+                SELECT id FROM patients
+                WHERE cni = ?
+            """, (cni,))
+
+        patient_existant = curseur.fetchone()
+
+        if patient_existant:
+            conn.close()
+            QMessageBox.warning(
+                self,
+                "Patient déjà enregistré",
+                "Ce patient existe déjà dans la base de données.\n"
+                "Un patient ne peut pas être enregistré deux fois."
+            )
+            return
 
         curseur.execute("""
             INSERT INTO patients
@@ -215,10 +246,10 @@ class FenetrePatient(QWidget):
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            self.nom.text().title(),
-            self.prenom.text().title(),
+            nom,
+            prenom,
             self.sexe.currentText(),
-            self.cni.text().upper(),
+            cni,
             self.telephone.text(),
             self.adresse.text(),
             self.naissance.date().toString("yyyy-MM-dd"),
@@ -238,10 +269,10 @@ class FenetrePatient(QWidget):
 
         patient = (
             patient_id,
-            self.nom.text().title(),
-            self.prenom.text().title(),
+            nom,
+            prenom,
             self.sexe.currentText(),
-            self.cni.text().upper(),
+            cni,
             self.telephone.text(),
             self.adresse.text(),
             self.naissance.date().toString("yyyy-MM-dd"),

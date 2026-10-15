@@ -222,15 +222,14 @@ class OrdonnancePreviewDialog(QDialog):
 
         top_depart = y(800)
         interligne = 150 * sy
-        hauteur_bloc = 120 * sy
+        hauteur_bloc = 150 * sy
 
         for i, ligne in enumerate(lignes, start=1):
             yy = top_depart + (i - 1) * interligne
 
             texte = (
                 f"{i}. {ligne.get('medicament', '').strip()} - "
-                f"    {ligne.get('posologie', '').strip()} - "
-                f"{ligne.get('duree', '').strip()}\n"
+                f"    {ligne.get('posologie', '').strip()}\n"
                 f"     {ligne.get('remarque', '').strip()}"
             )
 

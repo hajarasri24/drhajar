@@ -243,7 +243,7 @@ class FenetreAncienPatient(QWidget):
             FROM consultations c
             JOIN patients p ON p.id = c.patient_id
             WHERE c.date_consultation = ?
-            ORDER BY p.nom, p.prenom
+            ORDER BY p.id
         """, (self.jour_selectionne,))
 
         self.patients = curseur.fetchall()
