@@ -135,6 +135,7 @@ class CertificatMariagePreviewDialog(QDialog):
 
     def open_preview(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         preview = QPrintPreviewDialog(printer, self)
         preview.paintRequested.connect(self.render_on_printer)
@@ -142,6 +143,7 @@ class CertificatMariagePreviewDialog(QDialog):
 
     def print_document(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         dialog = QPrintDialog(printer, self)
 
@@ -191,7 +193,7 @@ class CertificatMariagePreviewDialog(QDialog):
 
         # ================= DATE (sur la ligne "Le :") =================
 
-        font_date = QFont("Verdana")
+        font_date = QFont("Aptos")
         font_date.setPointSizeF(12)
         font_date.setBold(True)
         painter.setFont(font_date)
@@ -213,7 +215,7 @@ class CertificatMariagePreviewDialog(QDialog):
         # (sur la ligne "بفحص المسمى / المسماة :")
         # Champ en arabe : texte aligné à droite, contre le libellé.
 
-        font_arabe = QFont("Verdana")
+        font_arabe = QFont("Aptos")
         font_arabe.setPointSizeF(16)
         font_arabe.setBold(True)
         painter.setFont(font_arabe)
@@ -233,7 +235,7 @@ class CertificatMariagePreviewDialog(QDialog):
         # ================= CNI =================
         # (sur la ligne "الحامل للبطاقة الوطنية رقم :")
 
-        font_cni = QFont("Verdana")
+        font_cni = QFont("Aptos")
         font_cni.setPointSizeF(16)
         font_cni.setBold(True)
         painter.setFont(font_cni)

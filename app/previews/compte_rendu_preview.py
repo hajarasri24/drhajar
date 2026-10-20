@@ -166,6 +166,7 @@ class CompteRenduPreviewDialog(QDialog):
 
     def open_preview(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         preview = QPrintPreviewDialog(printer, self)
         preview.paintRequested.connect(self.render_on_printer)
@@ -173,6 +174,7 @@ class CompteRenduPreviewDialog(QDialog):
 
     def print_document(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         dialog = QPrintDialog(printer, self)
 
@@ -225,7 +227,7 @@ class CompteRenduPreviewDialog(QDialog):
 
         painter.setPen(QPen(QColor(20, 20, 20)))
 
-        font_nom = QFont("Verdana", max(14, int(30 * sy)))
+        font_nom = QFont("Aptos", max(14, int(30 * sy)))
         font_nom.setBold(True)
         painter.setFont(font_nom)
 
@@ -233,7 +235,7 @@ class CompteRenduPreviewDialog(QDialog):
         painter.drawText(QRectF(x(1050), y(600), 300 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["date"])
         painter.drawText(QRectF(x(300), y(670), 400 * sx, 60 * sy), Qt.AlignLeft | Qt.AlignVCenter, d["poids"] + " Kg")
 
-        font_champ = QFont("Verdana", max(14, int(35 * sy)))
+        font_champ = QFont("Aptos", max(14, int(35 * sy)))
         font_champ.setBold(True)
         painter.setFont(font_champ)
 
@@ -268,7 +270,7 @@ class CompteRenduPreviewDialog(QDialog):
         
         
         painter.setPen(QPen(QColor(20, 20, 20)))
-        font_champ = QFont("Verdana", max(14, int(35 * sy)))
+        font_champ = QFont("Aptos", max(14, int(35 * sy)))
         font_champ.setBold(True)
         painter.setFont(font_champ)
 

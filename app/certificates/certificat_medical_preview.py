@@ -138,6 +138,7 @@ class CertificatMedicalPreviewDialog(QDialog):
 
     def open_preview(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         preview = QPrintPreviewDialog(printer, self)
         preview.paintRequested.connect(self.render_on_printer)
@@ -145,6 +146,7 @@ class CertificatMedicalPreviewDialog(QDialog):
 
     def print_document(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         dialog = QPrintDialog(printer, self)
 
@@ -192,7 +194,7 @@ class CertificatMedicalPreviewDialog(QDialog):
         noir = QColor(20, 20, 20)
         painter.setPen(QPen(noir))
 
-        font_champs = QFont("Verdana")
+        font_champs = QFont("Aptos")
         font_champs.setPointSizeF(14)
         font_champs.setBold(True)
         painter.setFont(font_champs)

@@ -111,6 +111,7 @@ class DemandeExamenPreviewDialog(QDialog):
 
     def open_preview(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         preview = QPrintPreviewDialog(printer, self)
         preview.paintRequested.connect(self.render_on_printer)
@@ -118,6 +119,7 @@ class DemandeExamenPreviewDialog(QDialog):
 
     def print_document(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         dialog = QPrintDialog(printer, self)
 
@@ -170,7 +172,7 @@ class DemandeExamenPreviewDialog(QDialog):
         texte_controle = self.data.get("texte_controle", "")
         lignes = self.data.get("lignes", [])
 
-        font_nom = QFont("Verdana")
+        font_nom = QFont("Aptos")
         font_nom.setPointSizeF(12)
         font_nom.setBold(True)
         painter.setFont(font_nom)
@@ -178,7 +180,7 @@ class DemandeExamenPreviewDialog(QDialog):
         painter.drawText(QRectF(x(200), y(630), 600* sx, 50 * sy),
                          Qt.AlignLeft | Qt.AlignVCenter, nom_patient)
 
-        font_infos = QFont("Verdana")
+        font_infos = QFont("Aptos")
         font_infos.setPointSizeF(12)
         font_infos.setBold(True)
         painter.setFont(font_infos)
@@ -189,7 +191,7 @@ class DemandeExamenPreviewDialog(QDialog):
         painter.drawText(QRectF(x(400), y(730), 260 * sx, 50 * sy),
                          Qt.AlignLeft | Qt.AlignVCenter, f"{poids} Kg")
 
-        font_title = QFont("Verdana")
+        font_title = QFont("Aptos")
         font_title.setPointSizeF(14)
         font_title.setBold(True)
         painter.setFont(font_title)
@@ -199,7 +201,7 @@ class DemandeExamenPreviewDialog(QDialog):
 
         painter.drawLine(int(x(520)), int(y(900)), int(x(1080)), int(y(900)))
 
-        font_lignes = QFont("Verdana")
+        font_lignes = QFont("Aptos")
         font_lignes.setPointSizeF(14)
         font_lignes.setBold(True)
         painter.setFont(font_lignes)

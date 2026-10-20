@@ -135,6 +135,7 @@ class CertificatPubertePreviewDialog(QDialog):
 
     def open_preview(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         preview = QPrintPreviewDialog(printer, self)
         preview.paintRequested.connect(self.render_on_printer)
@@ -142,6 +143,7 @@ class CertificatPubertePreviewDialog(QDialog):
 
     def print_document(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         dialog = QPrintDialog(printer, self)
 
@@ -189,7 +191,7 @@ class CertificatPubertePreviewDialog(QDialog):
         noir = QColor(20, 20, 20)
         painter.setPen(QPen(noir))
 
-        font_champs = QFont("Verdana")
+        font_champs = QFont("Aptos")
         font_champs.setPointSizeF(12)
         font_champs.setBold(True)
         painter.setFont(font_champs)
@@ -210,7 +212,7 @@ class CertificatPubertePreviewDialog(QDialog):
             self.date_du_jour
         )
 
-        font_text = QFont("Verdana")
+        font_text = QFont("Aptos")
         font_text.setPointSizeF(14)
         font_text.setBold(True)
         painter.setFont(font_text)

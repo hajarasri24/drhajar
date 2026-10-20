@@ -199,6 +199,7 @@ class RapportPreviewDialog(QDialog):
 
     def open_preview(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         preview = QPrintPreviewDialog(printer, self)
         preview.paintRequested.connect(self.render_on_printer)
@@ -206,6 +207,7 @@ class RapportPreviewDialog(QDialog):
 
     def print_document(self):
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFullPage(True)
         printer.setPageSize(QPageSize(QPageSize.A4))
         dialog = QPrintDialog(printer, self)
 
@@ -223,7 +225,7 @@ class RapportPreviewDialog(QDialog):
         sx = page_rect.width() / LARGEUR_REF
         sy = page_rect.height() / HAUTEUR_REF
 
-        font_corps = QFont("Verdana")
+        font_corps = QFont("Aptos")
         font_corps.setPointSizeF(10)
         font_corps.setBold(True)
 
@@ -276,7 +278,7 @@ class RapportPreviewDialog(QDialog):
 
         if len(pages) > 1:
 
-            font_note = QFont("Verdana")
+            font_note = QFont("Aptos")
             font_note.setPointSizeF(10)
             font_note.setItalic(True)
             painter.setFont(font_note)
@@ -389,7 +391,7 @@ class RapportPreviewDialog(QDialog):
 
         painter.setPen(QPen(QColor(20, 20, 20)))
 
-        font_date = QFont("Verdana")
+        font_date = QFont("Aptos")
         font_date.setPointSizeF(12)
         font_date.setBold(True)
         painter.setFont(font_date)
