@@ -102,6 +102,14 @@ class FenetreAgenda(QWidget):
         self.calendrier.setNavigationBarVisible(True)
         calendrier_layout.addWidget(self.calendrier)
 
+        explication_calendrier = QLabel(
+            "Les jours surlignés ont déjà des contrôles prévus — "
+            "cliquez sur un jour pour voir le nombre exact et le détail."
+        )
+        explication_calendrier.setObjectName("MutedLabel")
+        explication_calendrier.setWordWrap(True)
+        calendrier_layout.addWidget(explication_calendrier)
+
         layout.addWidget(carte_calendrier)
 
         # ================= APPOINTMENTS CARD =================
@@ -117,10 +125,8 @@ class FenetreAgenda(QWidget):
         self.date_selectionnee.setObjectName("SectionTitle")
         rdv_layout.addWidget(self.date_selectionnee)
 
-        self.resume = QLabel(
-            "Vert : 1 rendez-vous, orange : 2, rose : 3, rouge : 4, bordeaux : 5 ou plus."
-        )
-        self.resume.setObjectName("MutedLabel")
+        self.resume = QLabel()
+        self.resume.setWordWrap(True)
         rdv_layout.addWidget(self.resume)
 
         self.liste = QListWidget()
@@ -166,9 +172,16 @@ class FenetreAgenda(QWidget):
         rendez_vous = curseur.fetchall()
         conn.close()
 
-        if len(rendez_vous) == 0:
+        nb = len(rendez_vous)
+
+        if nb == 0:
+            self.resume.setText("✅ Aucun contrôle prévu ce jour-là.")
+            self.resume.setStyleSheet("color:#3C7A4C; font-weight:600;")
             self.liste.addItem("Aucun contrôle prévu.")
         else:
+            texte_nb = "1 contrôle" if nb == 1 else f"{nb} contrôles"
+            self.resume.setText(f"⚠️ {texte_nb} prévu(s) ce jour-là.")
+            self.resume.setStyleSheet("color:#A12F3A; font-weight:600;")
             for rendez_vous_patient in rendez_vous:
                 if rendez_vous_patient[3] == "Grossesse":
                     icone = "🤰"
@@ -228,28 +241,20 @@ class FenetreAgenda(QWidget):
 
         self.calendrier.setDateTextFormat(QDate(), QTextCharFormat())
 
-        for date_sql, nb in lignes:
+        # Une seule couleur : "ce jour a déjà des contrôles". Le nombre
+        # exact est donné en texte sous le calendrier une fois le jour
+        # cliqué, pas besoin de retenir un code couleur.
+        format_occupe = QTextCharFormat()
+
+        police = QFont()
+        police.setBold(True)
+        format_occupe.setFont(police)
+        format_occupe.setBackground(QColor("#F3D9DE"))
+        format_occupe.setForeground(QColor("#6E1E27"))
+
+        for date_sql, _ in lignes:
             date = QDate.fromString(date_sql, "yyyy-MM-dd")
-
-            format_date = QTextCharFormat()
-
-            police = QFont()
-            police.setBold(True)
-            format_date.setFont(police)
-            format_date.setForeground(QColor("#FFFFFF"))
-
-            if nb == 1:
-                format_date.setBackground(QColor("#5E8B68"))
-            elif nb == 2:
-                format_date.setBackground(QColor("#C9872B"))
-            elif nb == 3:
-                format_date.setBackground(QColor("#C2567A"))
-            elif nb == 4:
-                format_date.setBackground(QColor("#B13A48"))
-            else:
-                format_date.setBackground(QColor("#7B2432"))
-
-            self.calendrier.setDateTextFormat(date, format_date)
+            self.calendrier.setDateTextFormat(date, format_occupe)
 
     def modifier_rendez_vous(self, rendez_vous_id):
         """Choisit une nouvelle date et la persiste pour ce contrôle précis."""
