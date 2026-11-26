@@ -21,6 +21,7 @@ from PySide6.QtGui import (
     QFont,
 )
 from ..core.paths import DATABASE_PATH
+from ..core.theme import couleurs_actuelles
 
 
 class ChoisirDate(QWidget):
@@ -192,14 +193,16 @@ class ChoisirDate(QWidget):
         # Une seule couleur : "ce jour a déjà des contrôles".
         # Le nombre exact est donné en texte à côté, pas besoin
         # de retenir un code couleur.
+        c = couleurs_actuelles()
+
         format_occupe = QTextCharFormat()
 
         police = QFont()
         police.setBold(True)
         format_occupe.setFont(police)
 
-        format_occupe.setBackground(QColor("#F3D9DE"))
-        format_occupe.setForeground(QColor("#6E1E27"))
+        format_occupe.setBackground(QColor(c["table_selection_bg"]))
+        format_occupe.setForeground(QColor(c["section_title"]))
 
         for date_sql in self.comptes_par_date:
             date = QDate.fromString(date_sql, "yyyy-MM-dd")
@@ -241,10 +244,11 @@ class ChoisirDate(QWidget):
             ligne_layout.addWidget(label_date)
             ligne_layout.addStretch()
 
+            c = couleurs_actuelles()
             texte_nb = "1 contrôle" if nb == 1 else f"{nb} contrôles"
             badge = QLabel(texte_nb)
-            badge.setStyleSheet("""
-                background-color: #A12F3A;
+            badge.setStyleSheet(f"""
+                background-color: {c['primary_bg']};
                 color: white;
                 border-radius: 9px;
                 padding: 3px 10px;
@@ -265,6 +269,7 @@ class ChoisirDate(QWidget):
     def mettre_a_jour_jour_selectionne(self):
         date = self.calendrier.selectedDate()
         nb = self.comptes_par_date.get(date.toString("yyyy-MM-dd"), 0)
+        c = couleurs_actuelles()
 
         self.date_selectionnee.setText(date.toString("dddd dd MMMM yyyy"))
 
@@ -273,7 +278,7 @@ class ChoisirDate(QWidget):
                 "✅ Aucun contrôle prévu ce jour-là."
             )
             self.label_jour_selectionne.setStyleSheet(
-                "color:#3C7A4C; font-weight:600;"
+                f"color:{c['success_text']}; font-weight:600;"
             )
         else:
             texte_nb = "1 contrôle" if nb == 1 else f"{nb} contrôles"
@@ -281,7 +286,7 @@ class ChoisirDate(QWidget):
                 f"⚠️ {texte_nb} déjà prévu(s) ce jour-là."
             )
             self.label_jour_selectionne.setStyleSheet(
-                "color:#A12F3A; font-weight:600;"
+                f"color:{c['page_title']}; font-weight:600;"
             )
 
     def aller_a_la_date(self, item):

@@ -23,6 +23,7 @@ from PySide6.QtGui import (
     QFont,
 )
 from ..core.paths import DATABASE_PATH
+from ..core.theme import couleurs_actuelles
 
 
 class FenetreAgenda(QWidget):
@@ -173,15 +174,16 @@ class FenetreAgenda(QWidget):
         conn.close()
 
         nb = len(rendez_vous)
+        c = couleurs_actuelles()
 
         if nb == 0:
             self.resume.setText("✅ Aucun contrôle prévu ce jour-là.")
-            self.resume.setStyleSheet("color:#3C7A4C; font-weight:600;")
+            self.resume.setStyleSheet(f"color:{c['success_text']}; font-weight:600;")
             self.liste.addItem("Aucun contrôle prévu.")
         else:
             texte_nb = "1 contrôle" if nb == 1 else f"{nb} contrôles"
             self.resume.setText(f"⚠️ {texte_nb} prévu(s) ce jour-là.")
-            self.resume.setStyleSheet("color:#A12F3A; font-weight:600;")
+            self.resume.setStyleSheet(f"color:{c['page_title']}; font-weight:600;")
             for rendez_vous_patient in rendez_vous:
                 if rendez_vous_patient[3] == "Grossesse":
                     icone = "🤰"
@@ -244,13 +246,15 @@ class FenetreAgenda(QWidget):
         # Une seule couleur : "ce jour a déjà des contrôles". Le nombre
         # exact est donné en texte sous le calendrier une fois le jour
         # cliqué, pas besoin de retenir un code couleur.
+        c = couleurs_actuelles()
+
         format_occupe = QTextCharFormat()
 
         police = QFont()
         police.setBold(True)
         format_occupe.setFont(police)
-        format_occupe.setBackground(QColor("#F3D9DE"))
-        format_occupe.setForeground(QColor("#6E1E27"))
+        format_occupe.setBackground(QColor(c["table_selection_bg"]))
+        format_occupe.setForeground(QColor(c["section_title"]))
 
         for date_sql, _ in lignes:
             date = QDate.fromString(date_sql, "yyyy-MM-dd")

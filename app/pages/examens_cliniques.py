@@ -7,21 +7,29 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 from PySide6.QtCore import Qt
+from ..core.theme import couleurs_actuelles
 
 
 class ExamensCliniquesPage(QWidget):
 
-    STYLE_VIDE = (
-        "QToolButton { font-weight: 600; text-align: left; padding: 8px; "
-        "border: 1px solid #D9D0CC; border-radius: 8px; }"
-        "QToolButton:hover { background-color: #F3ECE9; }"
-    )
-    STYLE_REMPLI = (
-        "QToolButton { font-weight: 600; text-align: left; padding: 8px; "
-        "border: 1px solid #7CB342; border-radius: 8px; "
-        "background-color: #EAF5E4; }"
-        "QToolButton:hover { background-color: #DFEFD6; }"
-    )
+    @staticmethod
+    def style_vide():
+        c = couleurs_actuelles()
+        return (
+            "QToolButton { font-weight: 600; text-align: left; padding: 8px; "
+            f"border: 1px solid {c['btn_border']}; border-radius: 8px; }}"
+            f"QToolButton:hover {{ background-color: {c['btn_hover_bg']}; }}"
+        )
+
+    @staticmethod
+    def style_rempli():
+        c = couleurs_actuelles()
+        return (
+            "QToolButton { font-weight: 600; text-align: left; padding: 8px; "
+            f"border: 1px solid {c['success_border']}; border-radius: 8px; "
+            f"background-color: {c['success_bg']}; }}"
+            f"QToolButton:hover {{ background-color: {c['success_hover_bg']}; }}"
+        )
 
     def __init__(self):
         super().__init__()
@@ -65,7 +73,7 @@ class ExamensCliniquesPage(QWidget):
             titre_examen.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
             titre_examen.setArrowType(Qt.RightArrow)
             titre_examen.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            titre_examen.setStyleSheet(self.STYLE_VIDE)
+            titre_examen.setStyleSheet(self.style_vide())
             titre_examen.toggled.connect(
                 lambda ouvert, zone=champ, titre=titre_examen: self.basculer_examen(
                     ouvert, zone, titre
@@ -92,5 +100,5 @@ class ExamensCliniquesPage(QWidget):
         """Met en évidence le titre d'un examen dès que son contenu est rempli,
         pour repérer d'un coup d'œil les rubriques déjà saisies sans les rouvrir."""
         rempli = bool(champ.toPlainText().strip())
-        titre.setStyleSheet(cls.STYLE_REMPLI if rempli else cls.STYLE_VIDE)
+        titre.setStyleSheet(cls.style_rempli() if rempli else cls.style_vide())
         titre.setText(f"✓ {libelle}" if rempli else libelle)

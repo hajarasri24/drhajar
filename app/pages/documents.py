@@ -19,6 +19,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
 from ..core.paths import DATABASE_PATH, DOCUMENTS_DIR
+from ..core.theme import couleurs_actuelles
 from ..previews.documents_preview import DocumentPreviewDialog
 
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".gif")
@@ -35,10 +36,12 @@ class DocumentCard(QFrame):
         self.on_preview = on_preview
         self.on_delete = on_delete
 
+        c = couleurs_actuelles()
+
         self.setObjectName("Card")
         self.setCursor(Qt.PointingHandCursor)
         self.setStyleSheet(
-            "QFrame#Card { border: 1px solid rgba(0,0,0,0.12); "
+            f"QFrame#Card {{ border: 1px solid {c['card_border']}; "
             "border-radius: 8px; }"
         )
 
@@ -98,9 +101,11 @@ class DocumentCard(QFrame):
                 icone.setStyleSheet("border-radius: 4px;")
                 return icone
 
+        c = couleurs_actuelles()
+
         icone.setText("PDF" if extension == ".pdf" else extension.upper().lstrip("."))
         icone.setStyleSheet(
-            "background-color: rgba(0,0,0,0.06); border-radius: 6px; "
+            f"background-color: {c['placeholder_bg']}; border-radius: 6px; "
             "font-weight: bold; font-size: 11px;"
         )
         return icone

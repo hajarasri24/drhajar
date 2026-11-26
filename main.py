@@ -6,11 +6,12 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QVBoxLayout,
+    QHBoxLayout,
 )
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from app.core.theme import apply_theme
+from app.core.theme import apply_theme, basculer_theme, mode_sombre_actif
 from app.core.database import creer_tables
 from app.core.paths import ICON_PATH
 from app.screens.patient import FenetrePatient
@@ -31,6 +32,30 @@ fenetre.resize(700, 500)
 
 layout = QVBoxLayout()
 layout.setSpacing(20)
+
+# ================= MODE CLAIR / SOMBRE =================
+
+barre_theme = QHBoxLayout()
+barre_theme.addStretch()
+
+bouton_theme = QPushButton()
+bouton_theme.setObjectName("SecondaryButton")
+
+
+def texte_bouton_theme():
+    return "☀️ Mode clair" if mode_sombre_actif(app) else "🌙 Mode sombre"
+
+
+def basculer_mode_affichage():
+    basculer_theme(app)
+    bouton_theme.setText(texte_bouton_theme())
+
+
+bouton_theme.setText(texte_bouton_theme())
+bouton_theme.clicked.connect(basculer_mode_affichage)
+barre_theme.addWidget(bouton_theme)
+
+layout.addLayout(barre_theme)
 
 titre = QLabel("Dr Hajar Asri Fennassi")
 titre.setObjectName("PageTitle")
