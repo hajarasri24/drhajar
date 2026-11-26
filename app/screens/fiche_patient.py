@@ -157,6 +157,7 @@ class FichePatient(QWidget):
 
     def nouvelle_consultation(self):
         self.consultation = FenetreConsultation(self.patient)
+        self.consultation.consultation_enregistree.connect(self.charger_consultations)
         self.consultation.show()
 
     def nouvelle_grossesse(self):
@@ -171,4 +172,5 @@ class FichePatient(QWidget):
 
         self.consultation = FenetreConsultation(self.patient)
         self.consultation.charger_consultation(consultation_id)
+        self.consultation.consultation_enregistree.connect(self.charger_consultations)
         self.consultation.show()

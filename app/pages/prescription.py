@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QTextEdit, QCheckBox,
+    QWidget, QVBoxLayout, QLabel, QCheckBox,
     QPushButton, QHBoxLayout, QSizePolicy
 )
 from PySide6.QtCore import Qt
@@ -71,15 +71,6 @@ class PrescriptionPage(QWidget):
         actions_examens.addWidget(self.btn_apercu_examens)
         actions_examens.addWidget(self.btn_imprimer_examens)
         layout.addLayout(actions_examens)
-
-        observation_label = QLabel("Observations")
-        observation_label.setObjectName("SectionTitle")
-        layout.addWidget(observation_label)
-
-        self.observation = QTextEdit()
-        self.observation.setPlaceholderText("Observations, remarques...")
-        self.observation.setFixedHeight(500)
-        layout.addWidget(self.observation)
 
         self.mutuelle = QCheckBox("Feuille de mutuelle remplie")
         layout.addWidget(self.mutuelle)

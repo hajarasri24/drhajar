@@ -160,6 +160,12 @@ class CertificatMedicalPreviewDialog(QDialog):
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
         page_rect = QRectF(printer.pageRect(QPrinter.Unit.DevicePixel))
+        marge_cote = printer.resolution() * (4 / 25.4)
+        marge_haut = printer.resolution() * (4 / 25.4)
+        marge_bas = printer.resolution() * (10 / 25.4)
+        page_rect = page_rect.adjusted(
+            marge_cote, marge_haut, -marge_cote, -marge_bas
+        )
 
         if self.template_pixmap and not self.template_pixmap.isNull():
             scaled = self.template_pixmap.scaled(

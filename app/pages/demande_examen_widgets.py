@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QLineEdit, QPushButton, QSizePolicy
 )
+from ..core.theme import couleurs_actuelles
 
 
 class LigneDemandeExamen(QWidget):
@@ -57,8 +58,9 @@ class LigneDemandeExamen(QWidget):
             "Visible dans l'aperçu et à l'impression"
             if visible else "Masqué dans l'aperçu et à l'impression"
         )
+        c = couleurs_actuelles()
         self.btn_apercu.setStyleSheet(
-            "QPushButton { background-color: #F7E9EB; color: #872631; }"
+            f"QPushButton {{ background-color: {c['secondary_bg']}; color: {c['secondary_text']}; }}"
             if visible else
-            "QPushButton { background-color: #E5E0DE; color: #706966; }"
+            f"QPushButton {{ background-color: {c['neutral_bg']}; color: {c['neutral_text']}; }}"
         )

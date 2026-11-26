@@ -14,7 +14,7 @@ import sqlite3
 from ..core.utils import calculer_age, format_date
 from .choisir_date import ChoisirDate
 
-from PySide6.QtCore import QDate, Qt
+from PySide6.QtCore import QDate, Qt, Signal
 from ..previews.ordonnance_preview import OrdonnancePreviewDialog
 from ..previews.demande_examen_preview import DemandeExamenPreviewDialog
 from ..pages.consultation_page import ConsultationPage
@@ -24,10 +24,13 @@ from ..pages.examen_paraclinique import ExamenParacliniquePage
 from ..pages.prescription import PrescriptionPage
 from ..pages.facturation import FacturationPage
 from ..pages.documents import DocumentationPage
+from ..pages.observation import ObservationPage
 from ..core.paths import DATABASE_PATH
 
 
 class FenetreConsultation(QWidget):
+    consultation_enregistree = Signal()
+
     def __init__(self, patient=None):
         super().__init__()
 
@@ -69,6 +72,7 @@ class FenetreConsultation(QWidget):
         self.btn_prescription = QPushButton("💊 Prescription")
         self.btn_facturation = QPushButton("💳 Facturation")
         self.btn_documents = QPushButton("📁 Documents")
+        self.btn_observation = QPushButton("📝 Observation")
 
         for btn in [
             self.btn_consultation,
@@ -77,7 +81,8 @@ class FenetreConsultation(QWidget):
             self.btn_paraclinique,
             self.btn_prescription,
             self.btn_facturation,
-            self.btn_documents
+            self.btn_documents,
+            self.btn_observation
         ]:
             btn.setObjectName("SidebarButton")
             menu.addWidget(btn)
@@ -103,7 +108,8 @@ class FenetreConsultation(QWidget):
         self.page_prescription = PrescriptionPage()
         self.page_facturation = FacturationPage()
         self.page_documents = DocumentationPage()
-        
+        self.page_observation = ObservationPage()
+
 
         if self.patient:
             self.page_documents.definir_patient(self.patient)
@@ -117,6 +123,7 @@ class FenetreConsultation(QWidget):
 
         if self.patient:
             self.charger_dernier_atcd()
+            self.charger_dernier_observation()
 
         self.pages.addWidget(self.page_consultation)
         self.pages.addWidget(self.page_general)
@@ -125,6 +132,7 @@ class FenetreConsultation(QWidget):
         self.pages.addWidget(self.page_prescription)
         self.pages.addWidget(self.page_facturation)
         self.pages.addWidget(self.page_documents)
+        self.pages.addWidget(self.page_observation)
 
         zone_defilante = QScrollArea()
         zone_defilante.setWidgetResizable(True)
@@ -165,6 +173,10 @@ class FenetreConsultation(QWidget):
             lambda: self.changer_page(6, self.btn_documents)
         )
 
+        self.btn_observation.clicked.connect(
+            lambda: self.changer_page(7, self.btn_observation)
+        )
+
         self.btn_enregistrer.clicked.connect(self.enregistrer_consultation)
         self.btn_controle.clicked.connect(self.donner_controle)
 
@@ -183,6 +195,7 @@ class FenetreConsultation(QWidget):
             self.btn_prescription,
             self.btn_facturation,
             self.btn_documents,
+            self.btn_observation,
         ]:
             btn.setProperty("active", btn is active_button)
             btn.style().unpolish(btn)
@@ -232,6 +245,7 @@ class FenetreConsultation(QWidget):
             "Consultation enregistrée avec succès."
         )
 
+        self.consultation_enregistree.emit()
         self.close()
 
     def recuperer_donnees(self):
@@ -295,7 +309,7 @@ class FenetreConsultation(QWidget):
                 self.page_prescription.get_examens_lignes(),
             "ordonnance_lignes":
                 self.page_prescription.get_ordonnance_lignes(),
-            "observation": self.page_prescription.observation.toPlainText(),
+            "observation": self.page_observation.observation.toPlainText(),
             "montant_facturation": self.page_facturation.montant.text(),
             "mutuelle":
                 self.page_prescription.mutuelle.isChecked()
@@ -614,7 +628,7 @@ class FenetreConsultation(QWidget):
             self.charger_ordonnance_lignes_consultation(consultation_id)
         )
         self.page_facturation.montant.setText(consultation[29] or "")
-        self.page_prescription.observation.setPlainText(consultation[32] or "")
+        self.page_observation.observation.setPlainText(consultation[32] or "")
         self.page_prescription.mutuelle.setChecked(bool(consultation[33]))
 
     def charger_ordonnance_lignes_consultation(self, consultation_id):
@@ -660,6 +674,24 @@ class FenetreConsultation(QWidget):
 
         if resultat and resultat[0]:
             self.page_consultation.atcd.setPlainText(resultat[0])
+
+    def charger_dernier_observation(self):
+        conn = sqlite3.connect(DATABASE_PATH)
+        curseur = conn.cursor()
+
+        curseur.execute("""
+            SELECT observation
+            FROM consultations
+            WHERE patient_id=?
+            ORDER BY id DESC
+            LIMIT 1
+        """, (self.patient[0],))
+
+        resultat = curseur.fetchone()
+        conn.close()
+
+        if resultat and resultat[0]:
+            self.page_observation.observation.setPlainText(resultat[0])
 
     def donner_controle(self):
         if self.patient is None:

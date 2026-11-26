@@ -31,6 +31,7 @@ ICON_PATH = ASSETS_DIR / "icon" / "drhajar.ico"
 DATA_DIR = PROJECT_ROOT / "data"
 DATABASE_PATH = DATA_DIR / "drhajar.db"
 DOCUMENTS_DIR = DATA_DIR / "documents"
+THEME_PREFERENCE_PATH = DATA_DIR / "theme.txt"
 
 def template_path(filename: str) -> str:
     """Return the absolute path of a bundled PDF template."""
